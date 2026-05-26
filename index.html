@@ -1,0 +1,988 @@
+<!DOCTYPE html><html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Tarot Reflection OS</title>
+  <style>
+    :root {
+      --bg-1: #fff8f1;
+      --bg-2: #f3ecff;
+      --bg-3: #e8fbff;
+      --ink: #21182d;
+      --muted: #6f627c;
+      --card: rgba(255, 255, 255, 0.72);
+      --card-strong: rgba(255, 255, 255, 0.9);
+      --line: rgba(81, 56, 108, 0.15);
+      --gold: #c99942;
+      --violet: #7c4dff;
+      --rose: #c95c8d;
+      --teal: #229ca8;
+      --shadow: 0 18px 50px rgba(72, 46, 105, 0.18);
+      --radius: 26px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(255, 224, 180, 0.8), transparent 35%),
+    radial-gradient(circle at 90% 5%, rgba(198, 184, 255, 0.85), transparent 33%),
+    radial-gradient(circle at 50% 90%, rgba(194, 245, 255, 0.85), transparent 38%),
+    linear-gradient(135deg, var(--bg-1), var(--bg-2) 48%, var(--bg-3));
+  background-attachment: fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.28) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.22) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black, transparent 78%);
+  opacity: 0.45;
+}
+
+.app {
+  width: min(100%, 520px);
+  margin: 0 auto;
+  padding: 18px 14px calc(96px + var(--safe-bottom));
+  position: relative;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 2px 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sigil {
+  width: 44px;
+  height: 44px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, rgba(124,77,255,0.95), rgba(201,92,141,0.92));
+  color: white;
+  box-shadow: 0 12px 30px rgba(124,77,255,0.25);
+  font-size: 22px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+}
+
+.subtitle {
+  margin-top: 3px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.pill {
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.56);
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 12px;
+  box-shadow: 0 10px 28px rgba(80,50,100,0.08);
+  white-space: nowrap;
+}
+
+.hero {
+  border-radius: 34px;
+  background: linear-gradient(155deg, rgba(255,255,255,0.82), rgba(255,255,255,0.48));
+  border: 1px solid rgba(255,255,255,0.72);
+  box-shadow: var(--shadow);
+  padding: 17px;
+  overflow: hidden;
+  position: relative;
+  backdrop-filter: blur(18px);
+}
+
+.hero::after {
+  content: "✦";
+  position: absolute;
+  right: 22px;
+  top: 12px;
+  font-size: 52px;
+  color: rgba(201,153,66,0.22);
+}
+
+.hero h2 {
+  margin: 0 0 7px;
+  font-size: 25px;
+  letter-spacing: -0.04em;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 92%;
+}
+
+.tabs {
+  position: fixed;
+  z-index: 10;
+  left: 50%;
+  bottom: calc(12px + var(--safe-bottom));
+  transform: translateX(-50%);
+  width: min(calc(100% - 22px), 500px);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 5px;
+  padding: 7px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.76);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 18px 45px rgba(70, 41, 92, 0.2);
+}
+
+.tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 18px;
+  padding: 9px 4px;
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  gap: 2px;
+  place-items: center;
+}
+
+.tab span { font-size: 18px; line-height: 1; }
+.tab.active {
+  color: white;
+  background: linear-gradient(135deg, var(--violet), var(--rose));
+  box-shadow: 0 10px 24px rgba(124,77,255,0.28);
+}
+
+.view { display: none; padding-top: 15px; }
+.view.active { display: block; animation: rise 220ms ease both; }
+@keyframes rise { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+
+.panel {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.66);
+  border-radius: var(--radius);
+  padding: 15px;
+  box-shadow: 0 14px 38px rgba(83, 50, 108, 0.12);
+  backdrop-filter: blur(14px);
+  margin-bottom: 13px;
+}
+
+.section-title {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom: 11px;
+}
+
+.section-title h3 {
+  margin:0;
+  font-size: 17px;
+  letter-spacing: -0.025em;
+}
+
+.small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+
+.btn-row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 13px; }
+.btn-row.single { grid-template-columns: 1fr; }
+
+button, .file-label {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn {
+  border: 0;
+  border-radius: 19px;
+  padding: 13px 12px;
+  font-weight: 900;
+  font-size: 14px;
+  color: white;
+  background: linear-gradient(135deg, var(--violet), var(--rose));
+  box-shadow: 0 13px 28px rgba(124,77,255,0.25);
+  cursor: pointer;
+}
+
+.btn.secondary {
+  color: var(--ink);
+  background: rgba(255,255,255,0.72);
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.btn.gold { background: linear-gradient(135deg, #d7a444, #b87527); }
+.btn.teal { background: linear-gradient(135deg, #26a8b5, #336dbe); }
+.btn.danger { background: linear-gradient(135deg, #c04b66, #7d3f91); }
+
+.card-stage {
+  display: grid;
+  place-items: center;
+  padding: 12px 0 8px;
+  min-height: 360px;
+}
+
+.tarot-card {
+  width: 205px;
+  height: 324px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255,255,255,0.9), transparent 24%),
+    linear-gradient(145deg, rgba(50,31,79,0.98), rgba(124,77,255,0.88) 52%, rgba(201,92,141,0.92));
+  border: 2px solid rgba(255,255,255,0.76);
+  box-shadow: 0 25px 50px rgba(58,31,91,0.27);
+  padding: 13px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  text-align: center;
+  transition: transform 280ms ease, filter 280ms ease;
+}
+
+.tarot-card.empty {
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18), transparent 25%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 8px, transparent 8px 16px),
+    linear-gradient(145deg, #31204f, #7c4dff 55%, #c95c8d);
+}
+
+.tarot-card::before {
+  content:"";
+  position:absolute;
+  inset: 12px;
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 18px;
+  pointer-events:none;
+}
+
+.card-num { font-size: 11px; letter-spacing: .18em; opacity:.8; font-weight: 800; }
+.card-symbol {
+  align-self:center;
+  font-size: 76px;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.18));
+}
+.card-name {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  padding: 0 10px 10px;
+}
+
+.keywords { display:flex; flex-wrap:wrap; gap:7px; margin-top: 11px; }
+.tag {
+  display:inline-flex;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.58);
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #5d4b69;
+}
+
+textarea, input, select {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.68);
+  border-radius: 18px;
+  padding: 13px 14px;
+  font-family: inherit;
+  font-size: 15px;
+  color: var(--ink);
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
+}
+
+textarea { min-height: 118px; resize: vertical; line-height: 1.55; }
+
+.field { margin-top: 11px; }
+.label { font-size: 12px; font-weight: 900; color: var(--muted); margin: 0 0 6px 4px; }
+
+.question-box {
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,250,238,0.88), rgba(241,235,255,0.82));
+  border: 1px solid rgba(201,153,66,0.22);
+  padding: 13px;
+  line-height: 1.55;
+  font-weight: 750;
+  color: #3b2e49;
+}
+
+.list { display:grid; gap: 10px; }
+.entry {
+  background: rgba(255,255,255,0.66);
+  border: 1px solid var(--line);
+  border-radius: 21px;
+  padding: 13px;
+}
+.entry-head {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom: 8px;
+}
+.entry h4 { margin:0; font-size: 15px; }
+.entry-date { font-size: 11px; color: var(--muted); white-space:nowrap; }
+.entry p { margin: 7px 0 0; color: #493c55; line-height:1.5; font-size: 13.5px; }
+
+.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+details {
+  border-radius: 20px;
+  background: rgba(255,255,255,0.62);
+  border: 1px solid var(--line);
+  padding: 12px 13px;
+  margin-bottom: 10px;
+}
+summary { cursor:pointer; font-weight: 900; }
+details p, details li { color: #51435c; line-height: 1.55; font-size: 14px; }
+ol, ul { padding-left: 21px; }
+
+.stat-grid { display:grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
+.stat {
+  border-radius: 19px;
+  padding: 12px 8px;
+  text-align:center;
+  background: rgba(255,255,255,0.62);
+  border: 1px solid var(--line);
+}
+.stat strong { display:block; font-size: 20px; }
+.stat span { display:block; color: var(--muted); font-size: 11px; margin-top:3px; }
+
+.file-label {
+  display:block;
+  text-align:center;
+  border-radius: 19px;
+  padding: 13px 12px;
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--ink);
+  background: rgba(255,255,255,0.72);
+  border: 1px solid var(--line);
+}
+input[type="file"] { display:none; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(92px + var(--safe-bottom));
+  transform: translateX(-50%) translateY(12px);
+  width: min(calc(100% - 30px), 450px);
+  background: rgba(33,24,45,0.92);
+  color: white;
+  border-radius: 18px;
+  padding: 12px 14px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: 180ms ease;
+  z-index: 20;
+  text-align:center;
+  box-shadow: 0 18px 42px rgba(0,0,0,0.18);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.search-row { display:grid; grid-template-columns: 1fr 108px; gap: 8px; margin-bottom: 11px; }
+
+.empty-state {
+  color: var(--muted);
+  text-align: center;
+  padding: 22px 10px;
+  line-height: 1.55;
+}
+
+@media (max-width: 380px) {
+  .tarot-card { width: 190px; height: 302px; }
+  .card-stage { min-height: 336px; }
+  .hero h2 { font-size: 22px; }
+  .tab { font-size: 10px; }
+}
+
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="sigil">☾</div>
+        <div>
+          <h1>Tarot Reflection OS</h1>
+          <div class="subtitle">Học tarot bằng biểu tượng, trực giác và journaling.</div>
+        </div>
+      </div>
+      <div class="pill" id="todayPill">Hôm nay</div>
+    </header><section class="hero">
+  <h2>Rút một lá. Nhìn sâu hơn.</h2>
+  <p>Đây không phải app phán số mệnh. Mày rút bài bằng bộ thật, nhập tên lá vào đây, rồi dùng app như gương biểu tượng để soi cảm xúc, quyết định, pattern và bài học mỗi ngày.</p>
+</section>
+
+<section id="draw" class="view active">
+  <div class="panel">
+    <div class="section-title">
+      <h3>Lá mày rút ngoài đời</h3>
+      <span class="small" id="deckCount">Nhập tên lá</span>
+    </div>
+    <div class="field">
+      <div class="label">Nhập tên lá bài thực tế</div>
+      <input id="cardNameInput" placeholder="Ví dụ: The Fool, Death, Ace of Cups, 10 of Swords..." autocomplete="off" />
+    </div>
+    <div class="field">
+      <div class="label">Hoặc chọn nhanh trong bộ 78 lá</div>
+      <select id="cardPicker">
+        <option value="">Chọn lá bài...</option>
+      </select>
+    </div>
+    <div class="card-stage">
+      <div class="tarot-card empty" id="visualCard">
+        <div class="card-num">TAROT</div>
+        <div class="card-symbol">✦</div>
+        <div class="card-name">Chưa nhập lá</div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" id="loadCardBtn">Soi nghĩa lá này</button>
+      <button class="btn secondary" id="clearDrawBtn">Làm mới</button>
+    </div>
+  </div>
+
+  <div class="panel" id="meaningPanel" style="display:none;">
+    <div class="section-title">
+      <h3 id="cardTitle">Tên lá</h3>
+      <span class="small" id="cardSuit">Nhóm</span>
+    </div>
+    <div class="keywords" id="keywords"></div>
+    <div class="field">
+      <div class="label">Câu hỏi phản chiếu</div>
+      <div class="question-box" id="reflectionQuestion"></div>
+    </div>
+    <div class="field">
+      <div class="label">Ý nghĩa ngắn</div>
+      <div class="small" id="meaningText"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="journalPanel" style="display:none;">
+    <div class="section-title"><h3>Ghi chú hôm nay</h3><span class="small">Lưu trên máy</span></div>
+    <div class="field">
+      <div class="label">Cảm giác đầu tiên khi nhìn lá này</div>
+      <textarea id="firstFeeling" placeholder="Ví dụ: thấy cô độc, nhẹ lòng, hơi sợ, có gì đó giống mình..."></textarea>
+    </div>
+    <div class="field">
+      <div class="label">Nó đang phản ánh phần nào trong mình?</div>
+      <textarea id="selfMirror" placeholder="Viết thật. Không cần hay. Chỉ cần đúng với mình."></textarea>
+    </div>
+    <div class="field">
+      <div class="label">Một hành động nhỏ hôm nay</div>
+      <textarea id="tinyAction" placeholder="Ví dụ: nhắn cho một người, nghỉ 30 phút, dọn bàn, kiểm tra tiền, nói thật một chuyện..."></textarea>
+    </div>
+    <div class="btn-row single">
+      <button class="btn gold" id="saveEntryBtn">Lưu nhật ký</button>
+    </div>
+  </div>
+</section>
+
+<section id="guide" class="view">
+  <div class="panel">
+    <div class="section-title"><h3>Hướng dẫn từng bước</h3><span class="small">Cho người mới</span></div>
+    <details open>
+      <summary>Cách làm mỗi ngày</summary>
+      <ol>
+        <li>Ngồi yên 1–2 phút, thở chậm.</li>
+        <li>Xào bộ bài thật và hỏi: “Hôm nay mình nên chú ý điều gì?”</li>
+        <li>Rút 1 lá ngoài đời.</li>
+        <li>Nhập tên lá vào app hoặc chọn nhanh trong danh sách.</li>
+        <li>Đừng đọc nghĩa vội. Nhìn lá thật và ghi cảm giác đầu tiên.</li>
+        <li>Đọc từ khóa, ý nghĩa ngắn và câu hỏi phản chiếu trong app.</li>
+        <li>Viết 1 hành động nhỏ, làm được ngay hôm nay.</li>
+        <li>Cuối ngày quay lại đọc xem lá bài chạm vào điểm nào.</li>
+      </ol>
+    </details>
+    <details>
+      <summary>Đọc tarot không mê tín</summary>
+      <p>Đừng hỏi kiểu “tương lai chắc chắn ra sao?”. Hỏi kiểu tốt hơn: “Mình đang không thấy điều gì?”, “Vấn đề này đang dạy mình bài học gì?”, “Mình nên hành động thế nào cho tỉnh táo hơn?”.</p>
+    </details>
+    <details>
+      <summary>4 nhóm lá thường</summary>
+      <ul>
+        <li><b>Cups</b>: cảm xúc, tình yêu, kết nối.</li>
+        <li><b>Swords</b>: suy nghĩ, xung đột, sự thật.</li>
+        <li><b>Wands</b>: hành động, đam mê, ý chí.</li>
+        <li><b>Pentacles</b>: tiền, thân thể, công việc, vật chất.</li>
+      </ul>
+    </details>
+    <details>
+      <summary>22 lá Major Arcana</summary>
+      <p>Đây là các “bài học lớn” của đời người: khởi đầu, lựa chọn, quyền lực, khủng hoảng, chuyển hóa, chữa lành, hoàn tất. Khi rút Major, hãy hỏi: “Bài học lớn đang là gì?”.</p>
+    </details>
+    <details>
+      <summary>Có nên đọc lá ngược không?</summary>
+      <p>Mới học thì bỏ lá ngược. Khi quen rồi, lá ngược có thể hiểu là năng lượng bị kẹt, bị quá đà, hoặc đang quay vào bên trong.</p>
+    </details>
+  </div>
+</section>
+
+<section id="journal" class="view">
+  <div class="panel">
+    <div class="section-title"><h3>Nhật ký</h3><span class="small" id="entryCount">0 mục</span></div>
+    <div class="search-row">
+      <input id="searchInput" placeholder="Tìm theo lá bài, cảm xúc..." />
+      <select id="filterSuit">
+        <option value="">Tất cả</option>
+        <option value="Major Arcana">Major</option>
+        <option value="Cups">Cups</option>
+        <option value="Swords">Swords</option>
+        <option value="Wands">Wands</option>
+        <option value="Pentacles">Pentacles</option>
+      </select>
+    </div>
+    <div class="list" id="entryList"></div>
+  </div>
+</section>
+
+<section id="patterns" class="view">
+  <div class="panel">
+    <div class="section-title"><h3>Pattern của mày</h3><span class="small">Từ nhật ký</span></div>
+    <div class="stat-grid">
+      <div class="stat"><strong id="totalStat">0</strong><span>Lần rút</span></div>
+      <div class="stat"><strong id="majorStat">0</strong><span>Major</span></div>
+      <div class="stat"><strong id="streakStat">0</strong><span>Ngày gần đây</span></div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="section-title"><h3>Nhận định nhanh</h3><span class="small">Không cần AI</span></div>
+    <div id="patternText" class="small"></div>
+  </div>
+  <div class="panel">
+    <div class="section-title"><h3>Tần suất nhóm lá</h3><span class="small">Suit</span></div>
+    <div id="suitBars"></div>
+  </div>
+</section>
+
+<section id="data" class="view">
+  <div class="panel">
+    <div class="section-title"><h3>Dữ liệu</h3><span class="small">Local JSON</span></div>
+    <p class="small">Toàn bộ nhật ký lưu trong localStorage của trình duyệt điện thoại. Đổi máy hoặc xóa trình duyệt là mất, nên thỉnh thoảng xuất JSON để backup.</p>
+    <div class="btn-row">
+      <button class="btn teal" id="exportBtn">Xuất JSON</button>
+      <label class="file-label" for="importFile">Nạp JSON</label>
+      <input type="file" id="importFile" accept="application/json,.json" />
+    </div>
+    <div class="btn-row single">
+      <button class="btn danger" id="wipeBtn">Xóa toàn bộ dữ liệu</button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="section-title"><h3>Prompt AI phản chiếu</h3><span class="small">Copy dùng với GPT/Claude</span></div>
+    <textarea id="aiPrompt" readonly></textarea>
+    <div class="btn-row single"><button class="btn secondary" id="copyPromptBtn">Copy prompt</button></div>
+  </div>
+</section>
+
+  </main>  <nav class="tabs">
+    <button class="tab active" data-tab="draw"><span>✦</span>Rút</button>
+    <button class="tab" data-tab="guide"><span>☉</span>Học</button>
+    <button class="tab" data-tab="journal"><span>✎</span>Nhật ký</button>
+    <button class="tab" data-tab="patterns"><span>◈</span>Pattern</button>
+    <button class="tab" data-tab="data"><span>⇄</span>Dữ liệu</button>
+  </nav>  <div class="toast" id="toast"></div>  <script>
+    const STORAGE_KEY = "tarot_reflection_os_v1";
+    const todayPill = document.getElementById("todayPill");
+    todayPill.textContent = new Date().toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" });
+
+    const major = [
+      ["0", "The Fool", "Major Arcana", "✦", ["khởi đầu", "ngây thơ", "dấn thân"], "Mày đang được mời bước vào điều gì, dù chưa chắc chắn?", "Một khởi đầu mới, sự tự do, niềm tin ban đầu. Cũng nhắc coi chừng hấp tấp."],
+      ["I", "The Magician", "Major Arcana", "✴", ["ý chí", "công cụ", "tạo tác"], "Trong tay mày đã có công cụ gì mà mày đang quên dùng?", "Năng lực biến ý tưởng thành hành động. Tập trung ý chí và dùng thứ đang có."],
+      ["II", "The High Priestess", "Major Arcana", "☾", ["trực giác", "bí mật", "lắng nghe"], "Trực giác đang nói nhỏ điều gì mà lý trí mày lấn át?", "Sự im lặng, tri thức ẩn, cảm nhận sâu. Đừng vội phán xét."],
+      ["III", "The Empress", "Major Arcana", "❀", ["nuôi dưỡng", "sáng tạo", "sinh sôi"], "Thứ gì trong đời mày cần được chăm thay vì bị ép?", "Năng lượng nuôi dưỡng, sáng tạo, thân thể, thiên nhiên, sự đủ đầy."],
+      ["IV", "The Emperor", "Major Arcana", "♔", ["kỷ luật", "cấu trúc", "quyền lực"], "Chỗ nào cần luật chơi rõ ràng hơn?", "Cấu trúc, trách nhiệm, biên giới, lãnh đạo. Đừng để kiểm soát thành cứng nhắc."],
+      ["V", "The Hierophant", "Major Arcana", "☷", ["truyền thống", "học đạo", "hệ thống"], "Mày đang học từ hệ thống nào, và hệ nào cần phá?", "Niềm tin, thầy dạy, truyền thống, cộng đồng. Học luật trước khi vượt luật."],
+      ["VI", "The Lovers", "Major Arcana", "♡", ["lựa chọn", "kết nối", "giá trị"], "Lựa chọn này có khớp với giá trị thật của mày không?", "Tình yêu, liên minh, lựa chọn đạo đức. Sự hòa hợp cần trung thực."],
+      ["VII", "The Chariot", "Major Arcana", "☄", ["tiến lên", "kiểm soát", "chiến thắng"], "Mày cần cầm cương lại phần nào để đi đúng hướng?", "Ý chí tiến tới, điều phối lực kéo ngược nhau. Thắng bằng định hướng."],
+      ["VIII", "Strength", "Major Arcana", "∞", ["dịu mà mạnh", "can đảm", "thuần hóa"], "Mày có thể mềm hơn ở đâu mà vẫn không yếu?", "Sức mạnh nội tâm, kiên nhẫn, thuần hóa bản năng bằng sự dịu dàng."],
+      ["IX", "The Hermit", "Major Arcana", "♜", ["ẩn tu", "tìm kiếm", "ánh đèn"], "Mày cần ở một mình để hiểu rõ điều gì?", "Lùi lại, soi bên trong, tìm ánh sáng riêng. Cô độc có chủ đích."],
+      ["X", "Wheel of Fortune", "Major Arcana", "◎", ["chu kỳ", "cơ hội", "đổi vận"], "Chu kỳ nào đang xoay, và mày nên thích nghi sao?", "Biến động, cơ hội, thời vận. Đừng bám cứng vào một trạng thái."],
+      ["XI", "Justice", "Major Arcana", "⚖", ["công bằng", "hệ quả", "sự thật"], "Sự thật nào cần được nhìn thẳng, không né?", "Cân bằng, quyết định, trách nhiệm với hệ quả. Rõ ràng và công minh."],
+      ["XII", "The Hanged Man", "Major Arcana", "☌", ["tạm dừng", "đảo góc", "buông"], "Nếu nhìn ngược lại, vấn đề này sẽ khác ra sao?", "Dừng lại để đổi góc nhìn. Buông kiểm soát cũ để thấy điều mới."],
+      ["XIII", "Death", "Major Arcana", "✧", ["kết thúc", "chuyển hóa", "lột xác"], "Thứ gì đã hết vai trò nhưng mày vẫn giữ?", "Không nhất thiết là chết chóc. Là kết thúc cần thiết để tái sinh."],
+      ["XIV", "Temperance", "Major Arcana", "⚗", ["pha trộn", "điều độ", "chữa lành"], "Hai cực nào cần được pha lại cho vừa?", "Điều độ, chữa lành, phối hợp. Đi chậm mà bền."],
+      ["XV", "The Devil", "Major Arcana", "♆", ["ràng buộc", "ám ảnh", "dục vọng"], "Thứ gì đang trói mày nhưng mày gọi nó là lựa chọn?", "Sự lệ thuộc, cám dỗ, bóng tối. Nhìn rõ dây xích là bước đầu tháo nó."],
+      ["XVI", "The Tower", "Major Arcana", "⚡", ["sụp đổ", "sự thật", "giải phóng"], "Hệ cũ nào đang nứt, dù mày cố chống?", "Cú sốc phá ảo tưởng. Đau nhưng giải phóng khỏi nền móng sai."],
+      ["XVII", "The Star", "Major Arcana", "✶", ["hy vọng", "hồi phục", "định hướng"], "Điều gì vẫn còn sáng, dù nhỏ?", "Hy vọng, lành lại, niềm tin sau bão. Trở về với sự trong trẻo."],
+      ["XVIII", "The Moon", "Major Arcana", "☽", ["mơ hồ", "sợ hãi", "vô thức"], "Nỗi sợ nào đang làm hình ảnh méo đi?", "Mơ hồ, giấc mơ, cảm xúc ngầm. Đừng quyết lớn khi đang quá nhiễu."],
+      ["XIX", "The Sun", "Major Arcana", "☀", ["rõ ràng", "sống động", "niềm vui"], "Điều gì làm mày sống động thật?", "Ánh sáng, thành thật, sức sống, niềm vui đơn giản. Mọi thứ rõ hơn."],
+      ["XX", "Judgement", "Major Arcana", "♩", ["thức tỉnh", "tiếng gọi", "tái sinh"], "Tiếng gọi nào trong mày lâu rồi chưa trả lời?", "Thức tỉnh, tổng kết, được gọi sống đúng hơn. Đừng ngủ tiếp."],
+      ["XXI", "The World", "Major Arcana", "◉", ["hoàn tất", "tích hợp", "chu kỳ mới"], "Một chu kỳ nào đã đủ đầy để khép lại?", "Hoàn thành, tích hợp, trưởng thành. Kết thúc này mở ra vòng mới."]
+    ];
+
+    const suits = {
+      Cups: ["☕", "cảm xúc, tình yêu, kết nối"],
+      Swords: ["⚔", "suy nghĩ, sự thật, xung đột"],
+      Wands: ["🔥", "hành động, đam mê, ý chí"],
+      Pentacles: ["◆", "tiền bạc, thân thể, công việc"]
+    };
+
+    const ranks = [
+      ["Ace", "mầm mới", "Mầm năng lượng mới đang xuất hiện ở đâu?"],
+      ["Two", "lựa chọn", "Mày đang đứng giữa hai lực nào?"],
+      ["Three", "phát triển", "Điều gì cần cộng tác hoặc mở rộng?"],
+      ["Four", "ổn định", "Sự ổn định này là nền hay là kẹt?"],
+      ["Five", "xung đột", "Va chạm nào đang đòi mày tỉnh hơn?"],
+      ["Six", "dịch chuyển", "Điều gì đang đi qua giai đoạn mềm hơn?"],
+      ["Seven", "thử thách", "Mày cần bảo vệ điều gì?"],
+      ["Eight", "tiến trình", "Việc gì cần nhịp đều thay vì cảm hứng?"],
+      ["Nine", "gần hoàn tất", "Mày đã đi xa tới đâu mà chưa công nhận?"],
+      ["Ten", "đỉnh điểm", "Chu kỳ này đang quá đầy ở đâu?"],
+      ["Page", "học trò", "Mày cần học với sự tò mò ở đâu?"],
+      ["Knight", "chuyển động", "Năng lượng này đang lao đi hay đi đúng hướng?"],
+      ["Queen", "nội lực", "Mày đang nuôi dưỡng phẩm chất nào bên trong?"],
+      ["King", "làm chủ", "Chỗ nào cần bản lĩnh trưởng thành hơn?"]
+    ];
+
+    function minorMeaning(rank, suit) {
+      const base = {
+        Cups: "Cảm xúc, tình cảm, lòng trắc ẩn và mối liên hệ với người khác.",
+        Swords: "Tư duy, lời nói, sự thật, áp lực tinh thần và quyết định khó.",
+        Wands: "Lửa hành động, ý tưởng, tham vọng, sáng tạo và động lực.",
+        Pentacles: "Vật chất, tiền bạc, công việc, sức khỏe, thân thể và nền tảng sống."
+      }[suit];
+      return `${base} Lá ${rank} nhấn vào bài học: ${ranks.find(r => r[0] === rank)[1]}.`;
+    }
+
+    const deck = [
+      ...major.map(x => ({ num: x[0], name: x[1], suit: x[2], symbol: x[3], keywords: x[4], question: x[5], meaning: x[6] })),
+      ...Object.keys(suits).flatMap(suit => ranks.map(([rank, key, q], index) => ({
+        num: String(index + 1),
+        name: `${rank} of ${suit}`,
+        suit,
+        symbol: suits[suit][0],
+        keywords: [key, ...suits[suit][1].split(", ").slice(0,2)],
+        question: q,
+        meaning: minorMeaning(rank, suit)
+      })))
+    ];
+
+    let state = loadState();
+    let currentCard = null;
+
+    function loadState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { entries: [] };
+      } catch {
+        return { entries: [] };
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      updateAll();
+    }
+
+    function toast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
+    }
+
+    function normalizeCardName(str) {
+      return String(str || "")
+        .toLowerCase()
+        .replace(/ten/g, "10")
+        .replace(/nine/g, "9")
+        .replace(/eight/g, "8")
+        .replace(/seven/g, "7")
+        .replace(/six/g, "6")
+        .replace(/five/g, "5")
+        .replace(/four/g, "4")
+        .replace(/three/g, "3")
+        .replace(/two/g, "2")
+        .replace(/one/g, "ace")
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
+    }
+
+    function findCardByName(rawName) {
+      const q = normalizeCardName(rawName);
+      if (!q) return null;
+      return deck.find(c => normalizeCardName(c.name) === q)
+        || deck.find(c => normalizeCardName(c.name).includes(q))
+        || deck.find(c => q.includes(normalizeCardName(c.name)));
+    }
+
+    function loadTypedCard() {
+      const input = document.getElementById("cardNameInput").value;
+      const picker = document.getElementById("cardPicker").value;
+      const card = findCardByName(input || picker);
+      if (!card) {
+        toast("Chưa nhận ra lá này. Thử nhập đúng tiếng Anh: The Fool, Ace of Cups, 10 of Swords...");
+        return;
+      }
+      currentCard = card;
+      document.getElementById("cardNameInput").value = card.name;
+      document.getElementById("cardPicker").value = card.name;
+      renderCard(card);
+      document.getElementById("meaningPanel").style.display = "block";
+      document.getElementById("journalPanel").style.display = "block";
+      document.getElementById("firstFeeling").value = "";
+      document.getElementById("selfMirror").value = "";
+      document.getElementById("tinyAction").value = "";
+      toast("Đã soi: " + currentCard.name);
+    }
+
+    function renderCard(card) {
+      const visual = document.getElementById("visualCard");
+      visual.classList.remove("empty");
+      visual.style.transform = "rotate(" + (Math.random() * 2 - 1).toFixed(2) + "deg)";
+      visual.innerHTML = `<div class="card-num">${card.num} · ${card.suit}</div><div class="card-symbol">${card.symbol}</div><div class="card-name">${card.name}</div>`;
+      document.getElementById("cardTitle").textContent = card.name;
+      document.getElementById("cardSuit").textContent = card.suit;
+      document.getElementById("keywords").innerHTML = card.keywords.map(k => `<span class="tag">${k}</span>`).join("");
+      document.getElementById("reflectionQuestion").textContent = card.question;
+      document.getElementById("meaningText").textContent = card.meaning;
+    }
+
+    function clearDraw() {
+      currentCard = null;
+      document.getElementById("cardNameInput").value = "";
+      document.getElementById("cardPicker").value = "";
+      const visual = document.getElementById("visualCard");
+      visual.classList.add("empty");
+      visual.style.transform = "";
+      visual.innerHTML = `<div class="card-num">TAROT</div><div class="card-symbol">✦</div><div class="card-name">Chưa nhập lá</div>`;
+      document.getElementById("meaningPanel").style.display = "none";
+      document.getElementById("journalPanel").style.display = "none";
+    }
+
+    function saveEntry() {
+      if (!currentCard) return toast("Nhập hoặc chọn lá bài trước đã.");
+      const entry = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        createdAt: new Date().toISOString(),
+        card: currentCard,
+        firstFeeling: document.getElementById("firstFeeling").value.trim(),
+        selfMirror: document.getElementById("selfMirror").value.trim(),
+        tinyAction: document.getElementById("tinyAction").value.trim()
+      };
+      state.entries.unshift(entry);
+      saveState();
+      toast("Đã lưu nhật ký.");
+      switchTab("journal");
+    }
+
+    function renderEntries() {
+      const q = document.getElementById("searchInput").value.toLowerCase().trim();
+      const suit = document.getElementById("filterSuit").value;
+      let entries = state.entries.filter(e => !suit || e.card.suit === suit);
+      if (q) {
+        entries = entries.filter(e => JSON.stringify(e).toLowerCase().includes(q));
+      }
+      document.getElementById("entryCount").textContent = `${state.entries.length} mục`;
+      const list = document.getElementById("entryList");
+      if (!entries.length) {
+        list.innerHTML = `<div class="empty-state">Chưa có nhật ký phù hợp. Rút một lá rồi lưu lại cảm nhận đầu tiên.</div>`;
+        return;
+      }
+      list.innerHTML = entries.map(e => {
+        const date = new Date(e.createdAt).toLocaleDateString("vi-VN", { day:"2-digit", month:"2-digit", year:"numeric" });
+        return `<article class="entry">
+          <div class="entry-head"><h4>${e.card.symbol} ${e.card.name}</h4><div class="entry-date">${date}</div></div>
+          <div class="keywords">${e.card.keywords.map(k => `<span class="tag">${k}</span>`).join("")}</div>
+          ${e.firstFeeling ? `<p><b>Cảm giác:</b> ${escapeHtml(e.firstFeeling)}</p>` : ""}
+          ${e.selfMirror ? `<p><b>Phản chiếu:</b> ${escapeHtml(e.selfMirror)}</p>` : ""}
+          ${e.tinyAction ? `<p><b>Hành động:</b> ${escapeHtml(e.tinyAction)}</p>` : ""}
+          <div class="btn-row"><button class="btn secondary" onclick="reuseEntry('${e.id}')">Xem lại lá</button><button class="btn secondary" onclick="deleteEntry('${e.id}')">Xóa</button></div>
+        </article>`;
+      }).join("");
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+    }
+
+    window.deleteEntry = function(id) {
+      if (!confirm("Xóa mục này?")) return;
+      state.entries = state.entries.filter(e => e.id !== id);
+      saveState();
+      toast("Đã xóa.");
+    };
+
+    window.reuseEntry = function(id) {
+      const entry = state.entries.find(e => e.id === id);
+      if (!entry) return;
+      currentCard = entry.card;
+      renderCard(currentCard);
+      document.getElementById("meaningPanel").style.display = "block";
+      document.getElementById("journalPanel").style.display = "block";
+      switchTab("draw");
+    };
+
+    function updatePatterns() {
+      const entries = state.entries;
+      document.getElementById("totalStat").textContent = entries.length;
+      document.getElementById("majorStat").textContent = entries.filter(e => e.card.suit === "Major Arcana").length;
+      document.getElementById("streakStat").textContent = recentDayCount(entries);
+      const counts = { "Major Arcana":0, Cups:0, Swords:0, Wands:0, Pentacles:0 };
+      entries.forEach(e => counts[e.card.suit] = (counts[e.card.suit] || 0) + 1);
+      const max = Math.max(1, ...Object.values(counts));
+      document.getElementById("suitBars").innerHTML = Object.entries(counts).map(([k,v]) => `
+        <div style="margin:10px 0;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:850;"><span>${k}</span><span>${v}</span></div>
+          <div style="height:12px;border-radius:999px;background:rgba(255,255,255,.62);border:1px solid var(--line);overflow:hidden;margin-top:6px;">
+            <div style="height:100%;width:${(v/max)*100}%;background:linear-gradient(90deg,var(--violet),var(--rose));border-radius:999px;"></div>
+          </div>
+        </div>`).join("");
+      document.getElementById("patternText").innerHTML = patternAdvice(counts, entries);
+    }
+
+    function recentDayCount(entries) {
+      const set = new Set(entries.map(e => e.createdAt.slice(0,10)));
+      let count = 0;
+      const d = new Date();
+      while (set.has(d.toISOString().slice(0,10))) {
+        count++;
+        d.setDate(d.getDate() - 1);
+      }
+      return count;
+    }
+
+    function patternAdvice(counts, entries) {
+      if (!entries.length) return "Chưa đủ dữ liệu. Cứ rút bài và ghi chú vài ngày, pattern sẽ bắt đầu hiện ra.";
+      const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
+      const lines = [];
+      lines.push(`Nhóm xuất hiện nhiều nhất là <b>${top[0]}</b>.`);
+      if (top[0] === "Swords") lines.push("Có thể giai đoạn này mày đang sống nhiều trong đầu: suy nghĩ, phân tích, căng thẳng, quyết định.");
+      if (top[0] === "Cups") lines.push("Trọng tâm đang nghiêng về cảm xúc, quan hệ, kết nối và nhu cầu được lắng nghe.");
+      if (top[0] === "Wands") lines.push("Năng lượng hành động, tham vọng và ý tưởng đang nổi mạnh. Coi chừng cháy quá nhanh.");
+      if (top[0] === "Pentacles") lines.push("Đời sống vật chất, tiền bạc, sức khỏe, công việc và nền tảng đang đòi chú ý.");
+      if (top[0] === "Major Arcana") lines.push("Nhiều Major nghĩa là nhật ký đang chạm vào các bài học lớn, không chỉ chuyện vụn hằng ngày.");
+      const last = entries.slice(0,3).map(e => e.card.name).join(", ");
+      lines.push(`Ba lá gần nhất: <b>${last}</b>. Hỏi thử: chúng đang kể cùng một câu chuyện gì?`);
+      return lines.map(x => `<p>${x}</p>`).join("");
+    }
+
+    function updatePrompt() {
+      const recent = state.entries.slice(0,7).map(e => ({
+        date: e.createdAt.slice(0,10), card: e.card.name, suit: e.card.suit,
+        keywords: e.card.keywords, feeling: e.firstFeeling, mirror: e.selfMirror, action: e.tinyAction
+      }));
+      document.getElementById("aiPrompt").value = `Mày là người đồng hành phản chiếu nội tâm, không bói toán mê tín. Hãy đọc nhật ký tarot sau theo hướng biểu tượng, Jung/archetype, shadow work và hành động thực tế. Hãy chỉ ra pattern lặp lại, câu hỏi sâu hơn, và 1-3 hành động nhỏ cho ngày mai. Dữ liệu:\n\n${JSON.stringify(recent, null, 2)}`;
+    }
+
+    function exportJson() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `tarot-reflection-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+      toast("Đã xuất JSON.");
+    }
+
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          if (!data || !Array.isArray(data.entries)) throw new Error("bad");
+          state = data;
+          saveState();
+          toast("Đã nạp JSON.");
+        } catch {
+          toast("File JSON không đúng định dạng.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function wipeData() {
+      if (!confirm("Xóa toàn bộ nhật ký tarot trên máy này?")) return;
+      state = { entries: [] };
+      saveState();
+      toast("Đã xóa toàn bộ dữ liệu.");
+    }
+
+    function switchTab(id) {
+      document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
+      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === id));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      updateAll();
+    }
+
+    function populateCardPicker() {
+      const picker = document.getElementById("cardPicker");
+      if (!picker || picker.options.length > 1) return;
+      const groups = ["Major Arcana", "Cups", "Swords", "Wands", "Pentacles"];
+      groups.forEach(group => {
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = group;
+        deck.filter(c => c.suit === group).forEach(card => {
+          const option = document.createElement("option");
+          option.value = card.name;
+          option.textContent = card.name;
+          optgroup.appendChild(option);
+        });
+        picker.appendChild(optgroup);
+      });
+    }
+
+    function updateAll() {
+      populateCardPicker();
+      renderEntries();
+      updatePatterns();
+      updatePrompt();
+    }
+
+    document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
+    document.getElementById("loadCardBtn").addEventListener("click", loadTypedCard);
+    document.getElementById("cardNameInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") loadTypedCard();
+    });
+    document.getElementById("cardPicker").addEventListener("change", e => {
+      document.getElementById("cardNameInput").value = e.target.value;
+      if (e.target.value) loadTypedCard();
+    });
+    document.getElementById("clearDrawBtn").addEventListener("click", clearDraw);
+    document.getElementById("saveEntryBtn").addEventListener("click", saveEntry);
+    document.getElementById("searchInput").addEventListener("input", renderEntries);
+    document.getElementById("filterSuit").addEventListener("change", renderEntries);
+    document.getElementById("exportBtn").addEventListener("click", exportJson);
+    document.getElementById("importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
+    document.getElementById("wipeBtn").addEventListener("click", wipeData);
+    document.getElementById("copyPromptBtn").addEventListener("click", async () => {
+      await navigator.clipboard.writeText(document.getElementById("aiPrompt").value);
+      toast("Đã copy prompt AI.");
+    });
+
+    updateAll();
+  </script></body>
+</html>
