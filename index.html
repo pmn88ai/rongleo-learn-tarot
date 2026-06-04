@@ -1366,7 +1366,8 @@ function saveEntry(){
 }
 
 function escapeHtml(str){
-  return str.replace(/[&<>'"]/g,c=({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+  var map={"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"};
+  return str.replace(/[&<>'"]/g,function(c){return map[c];});
 }
 
 function renderEntries(){
