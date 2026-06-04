@@ -1388,7 +1388,10 @@ window.deleteEntry=function(id){
 window.reuseEntry=function(id){
   const entry=state.entries.find(e=>e.id===id);
   if(!entry)return;
-  currentCard=entry.card; renderCard(currentCard);
+  // Re-hydrate aspects nếu entry cũ chưa có
+  const fresh=deck.find(c=>c.name===entry.card.name);
+  currentCard = fresh ? Object.assign({},entry.card,{aspects:fresh.aspects,deepMeaning:fresh.deepMeaning,shadow:fresh.shadow}) : entry.card;
+  renderCard(currentCard);
   document.getElementById("meaningPanel").style.display="block";
   document.getElementById("journalPanel").style.display="block";
   switchTab("draw");
@@ -1450,12 +1453,31 @@ function exportJson(){
 function importJson(file){
   const reader=new FileReader();
   reader.onload=()=>{
-    try{
-      const data=JSON.parse(reader.result);
-      if(!data||!Array.isArray(data.entries))throw new Error("bad");
-      state=data; saveState(); toast("Đã nạp JSON.");
-    }catch{toast("File JSON không đúng định dạng.");}
+    let data;
+    try{ data=JSON.parse(reader.result); }
+    catch(e){ toast("File JSON không đọc được."); return; }
+    if(!data||!Array.isArray(data.entries)){
+      toast("Không tìm thấy entries trong file."); return;
+    }
+    // Re-hydrate card data từ deck hiện tại
+    // giúp backup cũ thiếu aspects vẫn hoạt động tốt
+    data.entries = data.entries.map(entry => {
+      const fresh = deck.find(c => c.name === entry.card.name);
+      if(fresh){
+        entry.card = Object.assign({}, entry.card, {
+          num: fresh.num, symbol: fresh.symbol,
+          keywords: fresh.keywords, question: fresh.question,
+          meaning: fresh.meaning, aspects: fresh.aspects,
+          deepMeaning: fresh.deepMeaning, shadow: fresh.shadow
+        });
+      }
+      return entry;
+    });
+    state = data;
+    saveState();
+    toast("✓ Đã nạp " + data.entries.length + " mục nhật ký.");
   };
+  reader.onerror=()=>toast("Khong doc duoc file.");
   reader.readAsText(file);
 }
 function wipeData(){
