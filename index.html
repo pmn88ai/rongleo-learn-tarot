@@ -3,986 +3,1566 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Tarot Reflection OS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-1: #fff8f1;
-      --bg-2: #f3ecff;
-      --bg-3: #e8fbff;
-      --ink: #21182d;
-      --muted: #6f627c;
-      --card: rgba(255, 255, 255, 0.72);
-      --card-strong: rgba(255, 255, 255, 0.9);
-      --line: rgba(81, 56, 108, 0.15);
-      --gold: #c99942;
-      --violet: #7c4dff;
-      --rose: #c95c8d;
-      --teal: #229ca8;
-      --shadow: 0 18px 50px rgba(72, 46, 105, 0.18);
-      --radius: 26px;
+      --bg-deep:   #0a0710;
+      --bg-mid:    #110d1a;
+      --bg-panel:  rgba(22, 15, 35, 0.85);
+      --bg-card:   rgba(28, 20, 44, 0.9);
+      --ink:       #e8dfc8;
+      --ink-dim:   #9a8fa8;
+      --ink-faint: #5a5068;
+      --gold:      #c9954a;
+      --gold-dim:  rgba(201,149,74,0.18);
+      --gold-line: rgba(201,149,74,0.30);
+      --crimson:   #8b2040;
+      --violet:    #5c3d8f;
+      --violet-br: #8a5fcf;
+      --teal:      #1e6e7a;
+      --line:      rgba(201,149,74,0.15);
+      --shadow:    0 20px 60px rgba(0,0,0,0.55);
+      --radius:    22px;
       --safe-bottom: env(safe-area-inset-bottom, 0px);
-    }* { box-sizing: border-box; }
+      --font-display: 'Cinzel', Georgia, serif;
+      --font-body:    'Crimson Pro', Georgia, serif;
+    }
+    * { box-sizing: border-box; }
 
-html, body {
-  margin: 0;
-  min-height: 100%;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--ink);
-  background:
-    radial-gradient(circle at 10% 0%, rgba(255, 224, 180, 0.8), transparent 35%),
-    radial-gradient(circle at 90% 5%, rgba(198, 184, 255, 0.85), transparent 33%),
-    radial-gradient(circle at 50% 90%, rgba(194, 245, 255, 0.85), transparent 38%),
-    linear-gradient(135deg, var(--bg-1), var(--bg-2) 48%, var(--bg-3));
-  background-attachment: fixed;
-}
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: var(--font-body);
+      font-size: 16px;
+      color: var(--ink);
+      background: var(--bg-deep);
+      background-image:
+        radial-gradient(ellipse at 15% 0%,   rgba(92,61,143,0.35) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 100%, rgba(139,32,64,0.25) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%,  rgba(10,7,16,1) 0%, transparent 100%);
+      background-attachment: fixed;
+    }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.28) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.22) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(circle at center, black, transparent 78%);
-  opacity: 0.45;
-}
+    /* star dust overlay */
+    body::before {
+      content: "";
+      position: fixed; inset: 0;
+      pointer-events: none;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%,  rgba(201,149,74,0.5) 0%, transparent 100%),
+        radial-gradient(1px 1px at 80% 10%,  rgba(201,149,74,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 55% 70%,  rgba(201,149,74,0.35) 0%, transparent 100%),
+        radial-gradient(1px 1px at 10% 80%,  rgba(201,149,74,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 90% 55%,  rgba(255,255,255,0.25) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 90%,  rgba(255,255,255,0.2) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 40%,  rgba(255,255,255,0.2) 0%, transparent 100%);
+      opacity: 0.8;
+      z-index: 0;
+    }
 
-.app {
-  width: min(100%, 520px);
-  margin: 0 auto;
-  padding: 18px 14px calc(96px + var(--safe-bottom));
-  position: relative;
-}
+    .app {
+      width: min(100%, 520px);
+      margin: 0 auto;
+      padding: 18px 14px calc(96px + var(--safe-bottom));
+      position: relative; z-index: 1;
+    }
 
-.topbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 2px 16px;
-}
+    /* ── TOPBAR ── */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; padding: 8px 2px 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .sigil {
+      width: 44px; height: 44px; border-radius: 14px;
+      display: grid; place-items: center;
+      background: linear-gradient(145deg, #1e1230, #3d2060);
+      border: 1px solid var(--gold-line);
+      color: var(--gold); font-size: 22px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(201,149,74,0.15);
+    }
+    h1 {
+      margin: 0; font-family: var(--font-display);
+      font-size: 17px; font-weight: 600;
+      letter-spacing: 0.04em; color: var(--ink);
+    }
+    .subtitle { margin-top: 3px; font-size: 12px; color: var(--ink-dim); font-style: italic; }
+    .pill {
+      border: 1px solid var(--gold-line);
+      background: rgba(201,149,74,0.08);
+      border-radius: 999px; padding: 7px 13px;
+      font-family: var(--font-display);
+      font-weight: 600; font-size: 11px; letter-spacing: 0.05em;
+      color: var(--gold); white-space: nowrap;
+    }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    /* ── HERO ── */
+    .hero {
+      border-radius: 26px;
+      background: linear-gradient(145deg, rgba(30,18,48,0.95), rgba(20,12,34,0.88));
+      border: 1px solid var(--gold-line);
+      box-shadow: var(--shadow);
+      padding: 20px 18px; overflow: hidden; position: relative;
+      margin-bottom: 4px;
+    }
+    .hero::before {
+      content: "✦";
+      position: absolute; right: 20px; top: 14px;
+      font-size: 48px; color: rgba(201,149,74,0.12); pointer-events: none;
+    }
+    .hero h2 {
+      margin: 0 0 8px;
+      font-family: var(--font-display);
+      font-size: 22px; font-weight: 600;
+      letter-spacing: 0.02em; color: var(--gold);
+    }
+    .hero p { margin: 0; color: var(--ink-dim); font-size: 14px; line-height: 1.6; max-width: 94%; }
 
-.sigil {
-  width: 44px;
-  height: 44px;
-  border-radius: 16px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, rgba(124,77,255,0.95), rgba(201,92,141,0.92));
-  color: white;
-  box-shadow: 0 12px 30px rgba(124,77,255,0.25);
-  font-size: 22px;
-}
+    /* ── TABS ── */
+    .tabs {
+      position: fixed; z-index: 10;
+      left: 50%; bottom: calc(12px + var(--safe-bottom));
+      transform: translateX(-50%);
+      width: min(calc(100% - 20px), 500px);
+      display: grid; grid-template-columns: repeat(5,1fr); gap: 4px;
+      padding: 6px;
+      border-radius: 22px;
+      border: 1px solid rgba(201,149,74,0.2);
+      background: rgba(10,7,16,0.92);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 -2px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03);
+    }
+    .tab {
+      appearance: none; border: 0; background: transparent;
+      color: var(--ink-faint); border-radius: 16px;
+      padding: 8px 4px; font-size: 10px; font-weight: 600;
+      font-family: var(--font-display); letter-spacing: 0.04em;
+      display: grid; gap: 2px; place-items: center; cursor: pointer;
+      transition: color 150ms;
+    }
+    .tab span { font-size: 17px; line-height: 1; }
+    .tab.active {
+      color: var(--gold);
+      background: linear-gradient(145deg, rgba(92,61,143,0.5), rgba(139,32,64,0.4));
+      border: 1px solid rgba(201,149,74,0.25);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.3);
+    }
 
-h1 {
-  margin: 0;
-  font-size: 21px;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
-}
+    /* ── VIEWS ── */
+    .view { display: none; padding-top: 14px; }
+    .view.active { display: block; animation: rise 220ms ease both; }
+    @keyframes rise { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
-.subtitle {
-  margin-top: 3px;
-  font-size: 12.5px;
-  color: var(--muted);
-}
+    /* ── PANELS ── */
+    .panel {
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px 15px;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+      backdrop-filter: blur(16px);
+      margin-bottom: 12px;
+    }
+    .panel-gold { border-color: var(--gold-line); }
 
-.pill {
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.56);
-  border-radius: 999px;
-  padding: 8px 11px;
-  font-weight: 700;
-  color: var(--ink);
-  font-size: 12px;
-  box-shadow: 0 10px 28px rgba(80,50,100,0.08);
-  white-space: nowrap;
-}
+    .section-title {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 10px; margin-bottom: 12px;
+    }
+    .section-title h3 {
+      margin: 0; font-family: var(--font-display);
+      font-size: 15px; font-weight: 600;
+      letter-spacing: 0.05em; color: var(--gold);
+    }
+    .small { color: var(--ink-dim); font-size: 13px; line-height: 1.55; }
+    .small-label { font-size: 11px; color: var(--ink-faint); font-family: var(--font-display); letter-spacing: 0.06em; }
 
-.hero {
-  border-radius: 34px;
-  background: linear-gradient(155deg, rgba(255,255,255,0.82), rgba(255,255,255,0.48));
-  border: 1px solid rgba(255,255,255,0.72);
-  box-shadow: var(--shadow);
-  padding: 17px;
-  overflow: hidden;
-  position: relative;
-  backdrop-filter: blur(18px);
-}
+    /* ── BUTTONS ── */
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+    .btn-row.single { grid-template-columns: 1fr; }
+    button, .file-label { font-family: inherit; -webkit-tap-highlight-color: transparent; }
+    .btn {
+      border: 0; border-radius: 16px;
+      padding: 12px 10px;
+      font-family: var(--font-display);
+      font-weight: 600; font-size: 12px; letter-spacing: 0.06em;
+      color: var(--ink); cursor: pointer;
+      background: linear-gradient(135deg, #3d2060, #5c1835);
+      border: 1px solid rgba(201,149,74,0.25);
+      box-shadow: 0 8px 22px rgba(0,0,0,0.35);
+      transition: transform 80ms, box-shadow 150ms;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn.primary {
+      background: linear-gradient(135deg, var(--violet), var(--crimson));
+      color: var(--ink);
+    }
+    .btn.gold-btn {
+      background: linear-gradient(135deg, #7a5520, #4a3010);
+      border-color: var(--gold-line); color: var(--gold);
+    }
+    .btn.teal-btn { background: linear-gradient(135deg, #1e4e5a, #133540); }
+    .btn.danger { background: linear-gradient(135deg, #5c1825, #3a0f18); border-color: rgba(139,32,64,0.5); }
+    .btn.secondary {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: var(--ink-dim);
+      box-shadow: none;
+    }
 
-.hero::after {
-  content: "✦";
-  position: absolute;
-  right: 22px;
-  top: 12px;
-  font-size: 52px;
-  color: rgba(201,153,66,0.22);
-}
+    /* ── TAROT CARD VISUAL ── */
+    .card-stage {
+      display: grid; place-items: center;
+      padding: 14px 0 10px; min-height: 340px;
+    }
+    .tarot-card {
+      width: 200px; height: 316px; border-radius: 20px;
+      background: linear-gradient(155deg, #1a0e2e 0%, #2d1650 45%, #1e0a20 100%);
+      border: 1px solid var(--gold-line);
+      box-shadow: 0 28px 56px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,149,74,0.12);
+      padding: 12px; color: var(--ink);
+      position: relative; overflow: hidden;
+      display: grid; grid-template-rows: auto 1fr auto;
+      text-align: center;
+      transition: transform 300ms ease;
+    }
+    .tarot-card::before {
+      content: "";
+      position: absolute; inset: 10px;
+      border: 1px solid rgba(201,149,74,0.22);
+      border-radius: 14px; pointer-events: none;
+    }
+    .tarot-card::after {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(circle at 50% 25%, rgba(201,149,74,0.07) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .tarot-card.empty {
+      background: linear-gradient(155deg, #0e0818 0%, #1a1030 50%, #0e0818 100%);
+      border-style: dashed;
+    }
+    .card-num { font-family: var(--font-display); font-size: 10px; letter-spacing: .2em; color: var(--gold); opacity:.7; }
+    .card-symbol { align-self: center; font-size: 68px; filter: drop-shadow(0 6px 14px rgba(201,149,74,0.3)); }
+    .card-name {
+      font-family: var(--font-display);
+      font-size: 14px; font-weight: 600;
+      letter-spacing: 0.03em; color: var(--gold);
+      padding: 0 8px 10px;
+    }
 
-.hero h2 {
-  margin: 0 0 7px;
-  font-size: 25px;
-  letter-spacing: -0.04em;
-}
+    /* ── KEYWORDS / TAGS ── */
+    .keywords { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .tag {
+      display: inline-flex; border-radius: 999px;
+      border: 1px solid var(--gold-line);
+      background: var(--gold-dim);
+      padding: 5px 10px; font-size: 12px;
+      font-family: var(--font-display); letter-spacing: 0.04em;
+      color: var(--gold);
+    }
 
-.hero p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.55;
-  max-width: 92%;
-}
+    /* ── INPUTS ── */
+    textarea, input, select {
+      width: 100%;
+      border: 1px solid rgba(201,149,74,0.2);
+      background: rgba(15,10,25,0.7);
+      border-radius: 14px;
+      padding: 12px 14px;
+      font-family: var(--font-body); font-size: 15px;
+      color: var(--ink); outline: none;
+      transition: border-color 150ms;
+    }
+    textarea:focus, input:focus, select:focus { border-color: var(--gold-line); }
+    textarea { min-height: 110px; resize: vertical; line-height: 1.6; }
+    select option { background: #1a1030; }
 
-.tabs {
-  position: fixed;
-  z-index: 10;
-  left: 50%;
-  bottom: calc(12px + var(--safe-bottom));
-  transform: translateX(-50%);
-  width: min(calc(100% - 22px), 500px);
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
-  padding: 7px;
-  border-radius: 24px;
-  border: 1px solid rgba(255,255,255,0.7);
-  background: rgba(255,255,255,0.76);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 18px 45px rgba(70, 41, 92, 0.2);
-}
+    .field { margin-top: 12px; }
+    .label { font-size: 11px; font-family: var(--font-display); letter-spacing: 0.07em; color: var(--ink-dim); margin: 0 0 6px 3px; }
 
-.tab {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  border-radius: 18px;
-  padding: 9px 4px;
-  font-size: 11px;
-  font-weight: 800;
-  display: grid;
-  gap: 2px;
-  place-items: center;
-}
+    /* ── QUESTION BOX ── */
+    .question-box {
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(92,61,143,0.2), rgba(139,32,64,0.15));
+      border: 1px solid rgba(201,149,74,0.2);
+      padding: 13px 14px;
+      line-height: 1.6; font-size: 15px; font-style: italic;
+      color: var(--ink);
+    }
+    .meaning-text {
+      line-height: 1.65; font-size: 14px; color: var(--ink-dim);
+      padding: 10px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
 
-.tab span { font-size: 18px; line-height: 1; }
-.tab.active {
-  color: white;
-  background: linear-gradient(135deg, var(--violet), var(--rose));
-  box-shadow: 0 10px 24px rgba(124,77,255,0.28);
-}
+    /* ── JOURNAL ENTRIES ── */
+    .list { display: grid; gap: 10px; }
+    .entry {
+      background: rgba(20,13,33,0.8);
+      border: 1px solid var(--line);
+      border-radius: 18px; padding: 14px;
+      transition: border-color 200ms;
+    }
+    .entry:hover { border-color: var(--gold-line); }
+    .entry-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+    .entry h4 { margin: 0; font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--gold); }
+    .entry-date { font-size: 11px; color: var(--ink-faint); white-space: nowrap; font-family: var(--font-display); letter-spacing: 0.04em; }
+    .entry p { margin: 6px 0 0; color: var(--ink-dim); line-height: 1.5; font-size: 13.5px; }
 
-.view { display: none; padding-top: 15px; }
-.view.active { display: block; animation: rise 220ms ease both; }
-@keyframes rise { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform:none; } }
+    /* ── STATS ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .stat {
+      border-radius: 16px; padding: 12px 8px; text-align: center;
+      background: rgba(20,13,33,0.8); border: 1px solid var(--line);
+    }
+    .stat strong { display: block; font-size: 22px; font-family: var(--font-display); color: var(--gold); }
+    .stat span { display: block; color: var(--ink-faint); font-size: 11px; margin-top: 3px; font-family: var(--font-display); letter-spacing: 0.05em; }
 
-.panel {
-  background: var(--card);
-  border: 1px solid rgba(255,255,255,0.66);
-  border-radius: var(--radius);
-  padding: 15px;
-  box-shadow: 0 14px 38px rgba(83, 50, 108, 0.12);
-  backdrop-filter: blur(14px);
-  margin-bottom: 13px;
-}
+    /* ── DETAILS / ACCORDION ── */
+    details {
+      border-radius: 16px;
+      background: rgba(18,12,30,0.85);
+      border: 1px solid var(--line);
+      padding: 12px 14px; margin-bottom: 9px;
+      transition: border-color 200ms;
+    }
+    details[open] { border-color: var(--gold-line); }
+    summary {
+      cursor: pointer; font-family: var(--font-display);
+      font-size: 13px; font-weight: 600; letter-spacing: 0.04em;
+      color: var(--gold); list-style: none; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    summary::after { content: "▾"; font-size: 12px; opacity: 0.6; transition: transform 200ms; }
+    details[open] summary::after { transform: rotate(180deg); }
+    details p, details li { color: var(--ink-dim); line-height: 1.65; font-size: 14px; margin-top: 10px; }
+    ol, ul { padding-left: 20px; }
+    ol li, ul li { margin-bottom: 7px; }
 
-.section-title {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom: 11px;
-}
+    /* ── SUIT BARS ── */
+    .suit-bar-wrap { margin: 9px 0; }
+    .suit-bar-label { display: flex; justify-content: space-between; font-size: 12px; font-family: var(--font-display); letter-spacing: 0.04em; color: var(--ink-dim); margin-bottom: 5px; }
+    .suit-bar-track { height: 8px; border-radius: 999px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.04); overflow: hidden; }
+    .suit-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--violet-br), var(--gold)); }
 
-.section-title h3 {
-  margin:0;
-  font-size: 17px;
-  letter-spacing: -0.025em;
-}
+    /* ── FILE / IMPORT ── */
+    .file-label {
+      display: block; text-align: center;
+      border-radius: 16px; padding: 12px 10px;
+      font-family: var(--font-display); font-weight: 600;
+      font-size: 12px; letter-spacing: 0.06em;
+      color: var(--ink-dim);
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    input[type="file"] { display: none; }
 
-.small { color: var(--muted); font-size: 12px; line-height: 1.45; }
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; left: 50%;
+      bottom: calc(90px + var(--safe-bottom));
+      transform: translateX(-50%) translateY(10px);
+      width: min(calc(100% - 30px), 440px);
+      background: rgba(20,13,33,0.97);
+      border: 1px solid var(--gold-line);
+      color: var(--gold); border-radius: 16px;
+      padding: 11px 16px; font-size: 13px;
+      font-family: var(--font-display); letter-spacing: 0.04em;
+      opacity: 0; pointer-events: none;
+      transition: 180ms ease; z-index: 20; text-align: center;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-.btn-row { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 13px; }
-.btn-row.single { grid-template-columns: 1fr; }
+    /* ── SEARCH ROW ── */
+    .search-row { display: grid; grid-template-columns: 1fr 100px; gap: 8px; margin-bottom: 11px; }
+    .empty-state { color: var(--ink-faint); text-align: center; padding: 26px 10px; line-height: 1.6; font-style: italic; }
 
-button, .file-label {
-  font-family: inherit;
-  -webkit-tap-highlight-color: transparent;
-}
+    /* ── LEARN SECTION SPECIFIC ── */
+    .learn-tabs {
+      display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .learn-tab {
+      border: 1px solid var(--line); background: rgba(18,12,30,0.7);
+      border-radius: 999px; padding: 7px 14px;
+      font-family: var(--font-display); font-size: 11px;
+      letter-spacing: 0.05em; color: var(--ink-dim);
+      cursor: pointer; transition: all 150ms; white-space: nowrap;
+    }
+    .learn-tab.active {
+      border-color: var(--gold-line); background: var(--gold-dim);
+      color: var(--gold);
+    }
+    .learn-view { display: none; }
+    .learn-view.active { display: block; animation: rise 180ms ease both; }
 
-.btn {
-  border: 0;
-  border-radius: 19px;
-  padding: 13px 12px;
-  font-weight: 900;
-  font-size: 14px;
-  color: white;
-  background: linear-gradient(135deg, var(--violet), var(--rose));
-  box-shadow: 0 13px 28px rgba(124,77,255,0.25);
-  cursor: pointer;
-}
+    /* Card encyclopedia */
+    .card-search-row { display: grid; grid-template-columns: 1fr 100px; gap: 8px; margin-bottom: 12px; }
+    .card-grid { display: grid; gap: 8px; }
+    .card-entry {
+      background: rgba(18,12,30,0.85); border: 1px solid var(--line);
+      border-radius: 16px; overflow: hidden; cursor: pointer;
+      transition: border-color 200ms;
+    }
+    .card-entry:hover, .card-entry[open] { border-color: var(--gold-line); }
+    .card-entry summary {
+      padding: 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--font-display); font-size: 13px; font-weight: 600;
+      color: var(--ink); letter-spacing: 0.03em;
+    }
+    .card-entry summary .ce-sym { font-size: 20px; width: 28px; text-align: center; }
+    .card-entry summary .ce-name { flex: 1; }
+    .card-entry summary .ce-num { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.1em; font-family: var(--font-display); }
+    .card-detail {
+      padding: 0 14px 14px; border-top: 1px solid var(--line);
+      margin-top: 2px;
+    }
+    .card-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0; }
+    .cd-block {
+      background: rgba(10,7,16,0.6); border-radius: 12px;
+      padding: 10px 11px; border: 1px solid rgba(255,255,255,0.04);
+    }
+    .cd-block h5 {
+      margin: 0 0 5px; font-family: var(--font-display);
+      font-size: 10px; letter-spacing: 0.1em; color: var(--gold); font-weight: 600;
+    }
+    .cd-block p { margin: 0; font-size: 13px; color: var(--ink-dim); line-height: 1.55; }
+    .cd-full { grid-column: 1/-1; }
+    .deep-questions { margin-top: 10px; }
+    .deep-questions h5 {
+      font-family: var(--font-display); font-size: 10px;
+      letter-spacing: 0.1em; color: var(--gold); font-weight: 600; margin: 0 0 8px;
+    }
+    .deep-questions li { font-size: 13px; color: var(--ink-dim); line-height: 1.6; margin-bottom: 6px; }
+    .archetype-badge {
+      display: inline-block; border-radius: 999px;
+      padding: 4px 10px; font-size: 11px;
+      font-family: var(--font-display); letter-spacing: 0.05em;
+      background: rgba(92,61,143,0.25); border: 1px solid rgba(92,61,143,0.4);
+      color: #a880f0; margin-top: 6px;
+    }
+    .shadow-badge {
+      display: inline-block; border-radius: 999px;
+      padding: 4px 10px; font-size: 11px;
+      font-family: var(--font-display); letter-spacing: 0.05em;
+      background: rgba(139,32,64,0.25); border: 1px solid rgba(139,32,64,0.4);
+      color: #d06080; margin-top: 6px; margin-left: 6px;
+    }
 
-.btn.secondary {
-  color: var(--ink);
-  background: rgba(255,255,255,0.72);
-  border: 1px solid var(--line);
-  box-shadow: none;
-}
+    /* Step-by-step ritual */
+    .ritual-step {
+      display: flex; gap: 13px; align-items: flex-start;
+      padding: 13px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .ritual-step:last-child { border-bottom: 0; padding-bottom: 0; }
+    .step-num {
+      min-width: 30px; height: 30px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--violet), var(--crimson));
+      border: 1px solid var(--gold-line);
+      display: grid; place-items: center;
+      font-family: var(--font-display); font-size: 12px; font-weight: 600;
+      color: var(--gold); flex-shrink: 0;
+    }
+    .step-body h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: 0.03em; }
+    .step-body p { margin: 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.6; }
+    .step-body ul { margin: 6px 0 0; padding-left: 18px; }
+    .step-body ul li { font-size: 13px; color: var(--ink-dim); line-height: 1.55; margin-bottom: 4px; }
 
-.btn.gold { background: linear-gradient(135deg, #d7a444, #b87527); }
-.btn.teal { background: linear-gradient(135deg, #26a8b5, #336dbe); }
-.btn.danger { background: linear-gradient(135deg, #c04b66, #7d3f91); }
+    /* Question bank */
+    .q-category { margin-bottom: 16px; }
+    .q-cat-title {
+      font-family: var(--font-display); font-size: 11px; letter-spacing: 0.1em;
+      color: var(--gold); font-weight: 600; margin: 0 0 8px;
+      padding-bottom: 6px; border-bottom: 1px solid var(--line);
+    }
+    .q-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-size: 13.5px; color: var(--ink-dim); line-height: 1.55;
+    }
+    .q-item::before { content: "◈"; color: var(--ink-faint); font-size: 11px; margin-top: 2px; flex-shrink: 0; }
 
-.card-stage {
-  display: grid;
-  place-items: center;
-  padding: 12px 0 8px;
-  min-height: 360px;
-}
+    /* Suit guide cards */
+    .suit-card {
+      border-radius: 16px; padding: 14px;
+      border: 1px solid var(--line); margin-bottom: 10px;
+      background: rgba(18,12,30,0.7);
+    }
+    .suit-card-head {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+    }
+    .suit-icon { font-size: 26px; }
+    .suit-card h4 { margin: 0; font-family: var(--font-display); font-size: 14px; font-weight: 600; color: var(--gold); letter-spacing: 0.04em; }
+    .suit-card .suit-element { font-size: 11px; color: var(--ink-faint); margin-top: 1px; font-family: var(--font-display); letter-spacing: 0.06em; }
+    .suit-card p { margin: 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.6; }
+    .suit-card .suit-keywords { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+    .suit-kw {
+      font-size: 11px; padding: 3px 9px; border-radius: 999px;
+      font-family: var(--font-display); letter-spacing: 0.04em;
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+      color: var(--ink-dim);
+    }
 
-.tarot-card {
-  width: 205px;
-  height: 324px;
-  border-radius: 24px;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255,255,255,0.9), transparent 24%),
-    linear-gradient(145deg, rgba(50,31,79,0.98), rgba(124,77,255,0.88) 52%, rgba(201,92,141,0.92));
-  border: 2px solid rgba(255,255,255,0.76);
-  box-shadow: 0 25px 50px rgba(58,31,91,0.27);
-  padding: 13px;
-  color: white;
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
-  text-align: center;
-  transition: transform 280ms ease, filter 280ms ease;
-}
+    /* Major arcana journey */
+    .journey-phase {
+      border-radius: 16px; padding: 14px;
+      border: 1px solid var(--line); margin-bottom: 10px;
+      background: rgba(18,12,30,0.7);
+    }
+    .journey-phase h4 {
+      margin: 0 0 6px; font-family: var(--font-display);
+      font-size: 13px; font-weight: 600; color: var(--gold); letter-spacing: 0.04em;
+    }
+    .journey-phase p { margin: 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.6; }
+    .journey-cards { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .journey-card-tag {
+      font-size: 11px; padding: 3px 9px; border-radius: 999px;
+      font-family: var(--font-display); letter-spacing: 0.03em;
+      background: rgba(92,61,143,0.2); border: 1px solid rgba(92,61,143,0.35);
+      color: #a880f0;
+    }
 
-.tarot-card.empty {
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,0.18), transparent 25%),
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.08) 0 8px, transparent 8px 16px),
-    linear-gradient(145deg, #31204f, #7c4dff 55%, #c95c8d);
-}
+    /* ── ASPECT ACCORDION ── */
+    .aspect-block {
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(14,10,22,0.7);
+      margin-bottom: 7px;
+      overflow: hidden;
+      transition: border-color 200ms;
+    }
+    .aspect-block[open] { border-color: var(--gold-line); }
+    .aspect-block summary {
+      padding: 11px 14px;
+      display: flex; align-items: center; gap: 9px;
+      font-family: var(--font-display); font-size: 12px;
+      font-weight: 600; letter-spacing: 0.06em;
+      color: var(--ink); list-style: none; cursor: pointer;
+    }
+    .aspect-block summary::after {
+      content: "▾"; margin-left: auto; font-size: 11px;
+      color: var(--ink-faint); transition: transform 200ms;
+    }
+    .aspect-block[open] summary::after { transform: rotate(180deg); }
+    .aspect-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+    .aspect-body {
+      padding: 0 14px 13px;
+      font-size: 14px; line-height: 1.7;
+      color: var(--ink-dim); border-top: 1px solid var(--line);
+      padding-top: 10px;
+    }
+    .aspect-body p { margin: 0 0 7px; }
+    .aspect-body p:last-child { margin: 0; }
+    .reversed-block {
+      border-radius: 14px; margin-top: 10px;
+      background: linear-gradient(135deg, rgba(139,32,64,0.12), rgba(92,61,143,0.1));
+      border: 1px solid rgba(139,32,64,0.25);
+      padding: 11px 14px;
+    }
+    .reversed-block .rev-label {
+      font-family: var(--font-display); font-size: 10px;
+      letter-spacing: 0.1em; color: #d06080; font-weight: 600; margin-bottom: 6px;
+    }
+    .reversed-block p { margin: 0; font-size: 13.5px; color: var(--ink-dim); line-height: 1.65; }
 
-.tarot-card::before {
-  content:"";
-  position:absolute;
-  inset: 12px;
-  border: 1px solid rgba(255,255,255,0.5);
-  border-radius: 18px;
-  pointer-events:none;
-}
-
-.card-num { font-size: 11px; letter-spacing: .18em; opacity:.8; font-weight: 800; }
-.card-symbol {
-  align-self:center;
-  font-size: 76px;
-  filter: drop-shadow(0 8px 18px rgba(0,0,0,0.18));
-}
-.card-name {
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  padding: 0 10px 10px;
-}
-
-.keywords { display:flex; flex-wrap:wrap; gap:7px; margin-top: 11px; }
-.tag {
-  display:inline-flex;
-  border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.58);
-  padding: 7px 10px;
-  font-size: 12px;
-  font-weight: 800;
-  color: #5d4b69;
-}
-
-textarea, input, select {
-  width: 100%;
-  border: 1px solid var(--line);
-  background: rgba(255,255,255,0.68);
-  border-radius: 18px;
-  padding: 13px 14px;
-  font-family: inherit;
-  font-size: 15px;
-  color: var(--ink);
-  outline: none;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.6);
-}
-
-textarea { min-height: 118px; resize: vertical; line-height: 1.55; }
-
-.field { margin-top: 11px; }
-.label { font-size: 12px; font-weight: 900; color: var(--muted); margin: 0 0 6px 4px; }
-
-.question-box {
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255,250,238,0.88), rgba(241,235,255,0.82));
-  border: 1px solid rgba(201,153,66,0.22);
-  padding: 13px;
-  line-height: 1.55;
-  font-weight: 750;
-  color: #3b2e49;
-}
-
-.list { display:grid; gap: 10px; }
-.entry {
-  background: rgba(255,255,255,0.66);
-  border: 1px solid var(--line);
-  border-radius: 21px;
-  padding: 13px;
-}
-.entry-head {
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
-  margin-bottom: 8px;
-}
-.entry h4 { margin:0; font-size: 15px; }
-.entry-date { font-size: 11px; color: var(--muted); white-space:nowrap; }
-.entry p { margin: 7px 0 0; color: #493c55; line-height:1.5; font-size: 13.5px; }
-
-.grid-2 { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-details {
-  border-radius: 20px;
-  background: rgba(255,255,255,0.62);
-  border: 1px solid var(--line);
-  padding: 12px 13px;
-  margin-bottom: 10px;
-}
-summary { cursor:pointer; font-weight: 900; }
-details p, details li { color: #51435c; line-height: 1.55; font-size: 14px; }
-ol, ul { padding-left: 21px; }
-
-.stat-grid { display:grid; grid-template-columns: repeat(3,1fr); gap: 9px; }
-.stat {
-  border-radius: 19px;
-  padding: 12px 8px;
-  text-align:center;
-  background: rgba(255,255,255,0.62);
-  border: 1px solid var(--line);
-}
-.stat strong { display:block; font-size: 20px; }
-.stat span { display:block; color: var(--muted); font-size: 11px; margin-top:3px; }
-
-.file-label {
-  display:block;
-  text-align:center;
-  border-radius: 19px;
-  padding: 13px 12px;
-  font-weight: 900;
-  font-size: 14px;
-  color: var(--ink);
-  background: rgba(255,255,255,0.72);
-  border: 1px solid var(--line);
-}
-input[type="file"] { display:none; }
-
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: calc(92px + var(--safe-bottom));
-  transform: translateX(-50%) translateY(12px);
-  width: min(calc(100% - 30px), 450px);
-  background: rgba(33,24,45,0.92);
-  color: white;
-  border-radius: 18px;
-  padding: 12px 14px;
-  font-size: 13px;
-  opacity: 0;
-  pointer-events: none;
-  transition: 180ms ease;
-  z-index: 20;
-  text-align:center;
-  box-shadow: 0 18px 42px rgba(0,0,0,0.18);
-}
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-.search-row { display:grid; grid-template-columns: 1fr 108px; gap: 8px; margin-bottom: 11px; }
-
-.empty-state {
-  color: var(--muted);
-  text-align: center;
-  padding: 22px 10px;
-  line-height: 1.55;
-}
-
-@media (max-width: 380px) {
-  .tarot-card { width: 190px; height: 302px; }
-  .card-stage { min-height: 336px; }
-  .hero h2 { font-size: 22px; }
-  .tab { font-size: 10px; }
-}
-
+    @media (max-width: 380px) {
+      .tarot-card { width: 185px; height: 294px; }
+      .card-stage { min-height: 320px; }
+      .hero h2 { font-size: 19px; }
+      .tab { font-size: 9px; }
+    }
   </style>
 </head>
 <body>
-  <main class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="sigil">☾</div>
-        <div>
-          <h1>Tarot Reflection OS</h1>
-          <div class="subtitle">Học tarot bằng biểu tượng, trực giác và journaling.</div>
+<main class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="sigil">☾</div>
+      <div>
+        <h1>Tarot Reflection OS</h1>
+        <div class="subtitle">Biểu tượng · Nội tâm · Nhật ký</div>
+      </div>
+    </div>
+    <div class="pill" id="todayPill">Hôm nay</div>
+  </header>
+
+  <section class="hero">
+    <h2>Rút một lá. Nhìn sâu hơn.</h2>
+    <p>Không phán số mệnh. Dùng tarot như gương biểu tượng để soi cảm xúc, quyết định, pattern và bài học mỗi ngày.</p>
+  </section>
+
+  <!-- ═══ DRAW ═══ -->
+  <section id="draw" class="view active">
+    <div class="panel">
+      <div class="section-title">
+        <h3>Lá mày rút hôm nay</h3>
+        <span class="small-label">78 LÁ</span>
+      </div>
+      <div class="field">
+        <div class="label">NHẬP TÊN LÁ BÀI</div>
+        <input id="cardNameInput" placeholder="The Fool, Death, Ace of Cups, 10 of Swords..." autocomplete="off" />
+      </div>
+      <div class="field">
+        <div class="label">HOẶC CHỌN NHANH</div>
+        <select id="cardPicker"><option value="">Chọn lá bài...</option></select>
+      </div>
+      <div class="card-stage">
+        <div class="tarot-card empty" id="visualCard">
+          <div class="card-num">ARCANA</div>
+          <div class="card-symbol">✦</div>
+          <div class="card-name">Chưa rút lá</div>
         </div>
       </div>
-      <div class="pill" id="todayPill">Hôm nay</div>
-    </header><section class="hero">
-  <h2>Rút một lá. Nhìn sâu hơn.</h2>
-  <p>Đây không phải app phán số mệnh. Mày rút bài bằng bộ thật, nhập tên lá vào đây, rồi dùng app như gương biểu tượng để soi cảm xúc, quyết định, pattern và bài học mỗi ngày.</p>
-</section>
-
-<section id="draw" class="view active">
-  <div class="panel">
-    <div class="section-title">
-      <h3>Lá mày rút ngoài đời</h3>
-      <span class="small" id="deckCount">Nhập tên lá</span>
-    </div>
-    <div class="field">
-      <div class="label">Nhập tên lá bài thực tế</div>
-      <input id="cardNameInput" placeholder="Ví dụ: The Fool, Death, Ace of Cups, 10 of Swords..." autocomplete="off" />
-    </div>
-    <div class="field">
-      <div class="label">Hoặc chọn nhanh trong bộ 78 lá</div>
-      <select id="cardPicker">
-        <option value="">Chọn lá bài...</option>
-      </select>
-    </div>
-    <div class="card-stage">
-      <div class="tarot-card empty" id="visualCard">
-        <div class="card-num">TAROT</div>
-        <div class="card-symbol">✦</div>
-        <div class="card-name">Chưa nhập lá</div>
+      <div class="btn-row">
+        <button class="btn primary" id="loadCardBtn">Soi nghĩa lá này</button>
+        <button class="btn secondary" id="clearDrawBtn">Làm mới</button>
       </div>
     </div>
-    <div class="btn-row">
-      <button class="btn" id="loadCardBtn">Soi nghĩa lá này</button>
-      <button class="btn secondary" id="clearDrawBtn">Làm mới</button>
+
+    <div class="panel" id="meaningPanel" style="display:none;">
+      <div class="section-title">
+        <h3 id="cardTitle">—</h3>
+        <span class="small-label" id="cardSuit">—</span>
+      </div>
+      <div class="keywords" id="keywords"></div>
+
+      <div class="field">
+        <div class="label">CÂU HỎI PHẢN CHIẾU</div>
+        <div class="question-box" id="reflectionQuestion"></div>
+      </div>
+
+      <!-- Ý nghĩa tổng quan -->
+      <div class="field">
+        <div class="label">Ý NGHĨA TỔNG QUAN</div>
+        <div class="meaning-text" id="meaningText"></div>
+      </div>
+
+      <!-- 5 khía cạnh chi tiết -->
+      <div class="field">
+        <div class="label">GIẢI THÍCH CHI TIẾT</div>
+        <div id="aspectsAccordion"></div>
+      </div>
     </div>
-  </div>
 
-  <div class="panel" id="meaningPanel" style="display:none;">
-    <div class="section-title">
-      <h3 id="cardTitle">Tên lá</h3>
-      <span class="small" id="cardSuit">Nhóm</span>
+    <div class="panel" id="journalPanel" style="display:none;">
+      <div class="section-title"><h3>Ghi chú hôm nay</h3><span class="small-label">LOCAL</span></div>
+      <div class="field">
+        <div class="label">CẢM GIÁC ĐẦU TIÊN KHI NHÌN LÁ</div>
+        <textarea id="firstFeeling" placeholder="Thấy cô độc, nhẹ lòng, hơi sợ, có gì đó giống mình..."></textarea>
+      </div>
+      <div class="field">
+        <div class="label">NÓ ĐANG PHẢN ÁNH PHẦN NÀO TRONG MÌNH?</div>
+        <textarea id="selfMirror" placeholder="Viết thật. Không cần hay. Chỉ cần đúng với mình."></textarea>
+      </div>
+      <div class="field">
+        <div class="label">MỘT HÀNH ĐỘNG NHỎ HÔM NAY</div>
+        <textarea id="tinyAction" placeholder="Nhắn cho một người, nghỉ 30 phút, dọn bàn, kiểm tra tiền..."></textarea>
+      </div>
+      <div class="btn-row single">
+        <button class="btn gold-btn" id="saveEntryBtn">✦ Lưu nhật ký</button>
+      </div>
     </div>
-    <div class="keywords" id="keywords"></div>
-    <div class="field">
-      <div class="label">Câu hỏi phản chiếu</div>
-      <div class="question-box" id="reflectionQuestion"></div>
+  </section>
+
+  <!-- ═══ LEARN ═══ -->
+  <section id="guide" class="view">
+
+    <div class="learn-tabs">
+      <button class="learn-tab active" data-learn="ritual">Nghi thức hàng ngày</button>
+      <button class="learn-tab" data-learn="questions">Câu hỏi hay</button>
+      <button class="learn-tab" data-learn="suits">4 Nhóm lá</button>
+      <button class="learn-tab" data-learn="major">Hành trình Major</button>
+      <button class="learn-tab" data-learn="encyclopedia">Tra cứu 78 lá</button>
     </div>
-    <div class="field">
-      <div class="label">Ý nghĩa ngắn</div>
-      <div class="small" id="meaningText"></div>
-    </div>
-  </div>
 
-  <div class="panel" id="journalPanel" style="display:none;">
-    <div class="section-title"><h3>Ghi chú hôm nay</h3><span class="small">Lưu trên máy</span></div>
-    <div class="field">
-      <div class="label">Cảm giác đầu tiên khi nhìn lá này</div>
-      <textarea id="firstFeeling" placeholder="Ví dụ: thấy cô độc, nhẹ lòng, hơi sợ, có gì đó giống mình..."></textarea>
-    </div>
-    <div class="field">
-      <div class="label">Nó đang phản ánh phần nào trong mình?</div>
-      <textarea id="selfMirror" placeholder="Viết thật. Không cần hay. Chỉ cần đúng với mình."></textarea>
-    </div>
-    <div class="field">
-      <div class="label">Một hành động nhỏ hôm nay</div>
-      <textarea id="tinyAction" placeholder="Ví dụ: nhắn cho một người, nghỉ 30 phút, dọn bàn, kiểm tra tiền, nói thật một chuyện..."></textarea>
-    </div>
-    <div class="btn-row single">
-      <button class="btn gold" id="saveEntryBtn">Lưu nhật ký</button>
-    </div>
-  </div>
-</section>
+    <!-- SUB-VIEW: RITUAL -->
+    <div class="learn-view active" id="learn-ritual">
+      <div class="panel panel-gold">
+        <div class="section-title"><h3>Nghi Thức Rút Bài Hàng Ngày</h3></div>
+        <p class="small" style="margin-bottom:14px;">Đây không phải checklist. Đây là nghi thức. Mỗi bước có mục đích riêng.</p>
 
-<section id="guide" class="view">
-  <div class="panel">
-    <div class="section-title"><h3>Hướng dẫn từng bước</h3><span class="small">Cho người mới</span></div>
-    <details open>
-      <summary>Cách làm mỗi ngày</summary>
-      <ol>
-        <li>Ngồi yên 1–2 phút, thở chậm.</li>
-        <li>Xào bộ bài thật và hỏi: “Hôm nay mình nên chú ý điều gì?”</li>
-        <li>Rút 1 lá ngoài đời.</li>
-        <li>Nhập tên lá vào app hoặc chọn nhanh trong danh sách.</li>
-        <li>Đừng đọc nghĩa vội. Nhìn lá thật và ghi cảm giác đầu tiên.</li>
-        <li>Đọc từ khóa, ý nghĩa ngắn và câu hỏi phản chiếu trong app.</li>
-        <li>Viết 1 hành động nhỏ, làm được ngay hôm nay.</li>
-        <li>Cuối ngày quay lại đọc xem lá bài chạm vào điểm nào.</li>
-      </ol>
-    </details>
-    <details>
-      <summary>Đọc tarot không mê tín</summary>
-      <p>Đừng hỏi kiểu “tương lai chắc chắn ra sao?”. Hỏi kiểu tốt hơn: “Mình đang không thấy điều gì?”, “Vấn đề này đang dạy mình bài học gì?”, “Mình nên hành động thế nào cho tỉnh táo hơn?”.</p>
-    </details>
-    <details>
-      <summary>4 nhóm lá thường</summary>
-      <ul>
-        <li><b>Cups</b>: cảm xúc, tình yêu, kết nối.</li>
-        <li><b>Swords</b>: suy nghĩ, xung đột, sự thật.</li>
-        <li><b>Wands</b>: hành động, đam mê, ý chí.</li>
-        <li><b>Pentacles</b>: tiền, thân thể, công việc, vật chất.</li>
-      </ul>
-    </details>
-    <details>
-      <summary>22 lá Major Arcana</summary>
-      <p>Đây là các “bài học lớn” của đời người: khởi đầu, lựa chọn, quyền lực, khủng hoảng, chuyển hóa, chữa lành, hoàn tất. Khi rút Major, hãy hỏi: “Bài học lớn đang là gì?”.</p>
-    </details>
-    <details>
-      <summary>Có nên đọc lá ngược không?</summary>
-      <p>Mới học thì bỏ lá ngược. Khi quen rồi, lá ngược có thể hiểu là năng lượng bị kẹt, bị quá đà, hoặc đang quay vào bên trong.</p>
-    </details>
-  </div>
-</section>
-
-<section id="journal" class="view">
-  <div class="panel">
-    <div class="section-title"><h3>Nhật ký</h3><span class="small" id="entryCount">0 mục</span></div>
-    <div class="search-row">
-      <input id="searchInput" placeholder="Tìm theo lá bài, cảm xúc..." />
-      <select id="filterSuit">
-        <option value="">Tất cả</option>
-        <option value="Major Arcana">Major</option>
-        <option value="Cups">Cups</option>
-        <option value="Swords">Swords</option>
-        <option value="Wands">Wands</option>
-        <option value="Pentacles">Pentacles</option>
-      </select>
-    </div>
-    <div class="list" id="entryList"></div>
-  </div>
-</section>
-
-<section id="patterns" class="view">
-  <div class="panel">
-    <div class="section-title"><h3>Pattern của mày</h3><span class="small">Từ nhật ký</span></div>
-    <div class="stat-grid">
-      <div class="stat"><strong id="totalStat">0</strong><span>Lần rút</span></div>
-      <div class="stat"><strong id="majorStat">0</strong><span>Major</span></div>
-      <div class="stat"><strong id="streakStat">0</strong><span>Ngày gần đây</span></div>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="section-title"><h3>Nhận định nhanh</h3><span class="small">Không cần AI</span></div>
-    <div id="patternText" class="small"></div>
-  </div>
-  <div class="panel">
-    <div class="section-title"><h3>Tần suất nhóm lá</h3><span class="small">Suit</span></div>
-    <div id="suitBars"></div>
-  </div>
-</section>
-
-<section id="data" class="view">
-  <div class="panel">
-    <div class="section-title"><h3>Dữ liệu</h3><span class="small">Local JSON</span></div>
-    <p class="small">Toàn bộ nhật ký lưu trong localStorage của trình duyệt điện thoại. Đổi máy hoặc xóa trình duyệt là mất, nên thỉnh thoảng xuất JSON để backup.</p>
-    <div class="btn-row">
-      <button class="btn teal" id="exportBtn">Xuất JSON</button>
-      <label class="file-label" for="importFile">Nạp JSON</label>
-      <input type="file" id="importFile" accept="application/json,.json" />
-    </div>
-    <div class="btn-row single">
-      <button class="btn danger" id="wipeBtn">Xóa toàn bộ dữ liệu</button>
-    </div>
-  </div>
-  <div class="panel">
-    <div class="section-title"><h3>Prompt AI phản chiếu</h3><span class="small">Copy dùng với GPT/Claude</span></div>
-    <textarea id="aiPrompt" readonly></textarea>
-    <div class="btn-row single"><button class="btn secondary" id="copyPromptBtn">Copy prompt</button></div>
-  </div>
-</section>
-
-  </main>  <nav class="tabs">
-    <button class="tab active" data-tab="draw"><span>✦</span>Rút</button>
-    <button class="tab" data-tab="guide"><span>☉</span>Học</button>
-    <button class="tab" data-tab="journal"><span>✎</span>Nhật ký</button>
-    <button class="tab" data-tab="patterns"><span>◈</span>Pattern</button>
-    <button class="tab" data-tab="data"><span>⇄</span>Dữ liệu</button>
-  </nav>  <div class="toast" id="toast"></div>  <script>
-    const STORAGE_KEY = "tarot_reflection_os_v1";
-    const todayPill = document.getElementById("todayPill");
-    todayPill.textContent = new Date().toLocaleDateString("vi-VN", { weekday: "short", day: "2-digit", month: "2-digit" });
-
-    const major = [
-      ["0", "The Fool", "Major Arcana", "✦", ["khởi đầu", "ngây thơ", "dấn thân"], "Mày đang được mời bước vào điều gì, dù chưa chắc chắn?", "Một khởi đầu mới, sự tự do, niềm tin ban đầu. Cũng nhắc coi chừng hấp tấp."],
-      ["I", "The Magician", "Major Arcana", "✴", ["ý chí", "công cụ", "tạo tác"], "Trong tay mày đã có công cụ gì mà mày đang quên dùng?", "Năng lực biến ý tưởng thành hành động. Tập trung ý chí và dùng thứ đang có."],
-      ["II", "The High Priestess", "Major Arcana", "☾", ["trực giác", "bí mật", "lắng nghe"], "Trực giác đang nói nhỏ điều gì mà lý trí mày lấn át?", "Sự im lặng, tri thức ẩn, cảm nhận sâu. Đừng vội phán xét."],
-      ["III", "The Empress", "Major Arcana", "❀", ["nuôi dưỡng", "sáng tạo", "sinh sôi"], "Thứ gì trong đời mày cần được chăm thay vì bị ép?", "Năng lượng nuôi dưỡng, sáng tạo, thân thể, thiên nhiên, sự đủ đầy."],
-      ["IV", "The Emperor", "Major Arcana", "♔", ["kỷ luật", "cấu trúc", "quyền lực"], "Chỗ nào cần luật chơi rõ ràng hơn?", "Cấu trúc, trách nhiệm, biên giới, lãnh đạo. Đừng để kiểm soát thành cứng nhắc."],
-      ["V", "The Hierophant", "Major Arcana", "☷", ["truyền thống", "học đạo", "hệ thống"], "Mày đang học từ hệ thống nào, và hệ nào cần phá?", "Niềm tin, thầy dạy, truyền thống, cộng đồng. Học luật trước khi vượt luật."],
-      ["VI", "The Lovers", "Major Arcana", "♡", ["lựa chọn", "kết nối", "giá trị"], "Lựa chọn này có khớp với giá trị thật của mày không?", "Tình yêu, liên minh, lựa chọn đạo đức. Sự hòa hợp cần trung thực."],
-      ["VII", "The Chariot", "Major Arcana", "☄", ["tiến lên", "kiểm soát", "chiến thắng"], "Mày cần cầm cương lại phần nào để đi đúng hướng?", "Ý chí tiến tới, điều phối lực kéo ngược nhau. Thắng bằng định hướng."],
-      ["VIII", "Strength", "Major Arcana", "∞", ["dịu mà mạnh", "can đảm", "thuần hóa"], "Mày có thể mềm hơn ở đâu mà vẫn không yếu?", "Sức mạnh nội tâm, kiên nhẫn, thuần hóa bản năng bằng sự dịu dàng."],
-      ["IX", "The Hermit", "Major Arcana", "♜", ["ẩn tu", "tìm kiếm", "ánh đèn"], "Mày cần ở một mình để hiểu rõ điều gì?", "Lùi lại, soi bên trong, tìm ánh sáng riêng. Cô độc có chủ đích."],
-      ["X", "Wheel of Fortune", "Major Arcana", "◎", ["chu kỳ", "cơ hội", "đổi vận"], "Chu kỳ nào đang xoay, và mày nên thích nghi sao?", "Biến động, cơ hội, thời vận. Đừng bám cứng vào một trạng thái."],
-      ["XI", "Justice", "Major Arcana", "⚖", ["công bằng", "hệ quả", "sự thật"], "Sự thật nào cần được nhìn thẳng, không né?", "Cân bằng, quyết định, trách nhiệm với hệ quả. Rõ ràng và công minh."],
-      ["XII", "The Hanged Man", "Major Arcana", "☌", ["tạm dừng", "đảo góc", "buông"], "Nếu nhìn ngược lại, vấn đề này sẽ khác ra sao?", "Dừng lại để đổi góc nhìn. Buông kiểm soát cũ để thấy điều mới."],
-      ["XIII", "Death", "Major Arcana", "✧", ["kết thúc", "chuyển hóa", "lột xác"], "Thứ gì đã hết vai trò nhưng mày vẫn giữ?", "Không nhất thiết là chết chóc. Là kết thúc cần thiết để tái sinh."],
-      ["XIV", "Temperance", "Major Arcana", "⚗", ["pha trộn", "điều độ", "chữa lành"], "Hai cực nào cần được pha lại cho vừa?", "Điều độ, chữa lành, phối hợp. Đi chậm mà bền."],
-      ["XV", "The Devil", "Major Arcana", "♆", ["ràng buộc", "ám ảnh", "dục vọng"], "Thứ gì đang trói mày nhưng mày gọi nó là lựa chọn?", "Sự lệ thuộc, cám dỗ, bóng tối. Nhìn rõ dây xích là bước đầu tháo nó."],
-      ["XVI", "The Tower", "Major Arcana", "⚡", ["sụp đổ", "sự thật", "giải phóng"], "Hệ cũ nào đang nứt, dù mày cố chống?", "Cú sốc phá ảo tưởng. Đau nhưng giải phóng khỏi nền móng sai."],
-      ["XVII", "The Star", "Major Arcana", "✶", ["hy vọng", "hồi phục", "định hướng"], "Điều gì vẫn còn sáng, dù nhỏ?", "Hy vọng, lành lại, niềm tin sau bão. Trở về với sự trong trẻo."],
-      ["XVIII", "The Moon", "Major Arcana", "☽", ["mơ hồ", "sợ hãi", "vô thức"], "Nỗi sợ nào đang làm hình ảnh méo đi?", "Mơ hồ, giấc mơ, cảm xúc ngầm. Đừng quyết lớn khi đang quá nhiễu."],
-      ["XIX", "The Sun", "Major Arcana", "☀", ["rõ ràng", "sống động", "niềm vui"], "Điều gì làm mày sống động thật?", "Ánh sáng, thành thật, sức sống, niềm vui đơn giản. Mọi thứ rõ hơn."],
-      ["XX", "Judgement", "Major Arcana", "♩", ["thức tỉnh", "tiếng gọi", "tái sinh"], "Tiếng gọi nào trong mày lâu rồi chưa trả lời?", "Thức tỉnh, tổng kết, được gọi sống đúng hơn. Đừng ngủ tiếp."],
-      ["XXI", "The World", "Major Arcana", "◉", ["hoàn tất", "tích hợp", "chu kỳ mới"], "Một chu kỳ nào đã đủ đầy để khép lại?", "Hoàn thành, tích hợp, trưởng thành. Kết thúc này mở ra vòng mới."]
-    ];
-
-    const suits = {
-      Cups: ["☕", "cảm xúc, tình yêu, kết nối"],
-      Swords: ["⚔", "suy nghĩ, sự thật, xung đột"],
-      Wands: ["🔥", "hành động, đam mê, ý chí"],
-      Pentacles: ["◆", "tiền bạc, thân thể, công việc"]
-    };
-
-    const ranks = [
-      ["Ace", "mầm mới", "Mầm năng lượng mới đang xuất hiện ở đâu?"],
-      ["Two", "lựa chọn", "Mày đang đứng giữa hai lực nào?"],
-      ["Three", "phát triển", "Điều gì cần cộng tác hoặc mở rộng?"],
-      ["Four", "ổn định", "Sự ổn định này là nền hay là kẹt?"],
-      ["Five", "xung đột", "Va chạm nào đang đòi mày tỉnh hơn?"],
-      ["Six", "dịch chuyển", "Điều gì đang đi qua giai đoạn mềm hơn?"],
-      ["Seven", "thử thách", "Mày cần bảo vệ điều gì?"],
-      ["Eight", "tiến trình", "Việc gì cần nhịp đều thay vì cảm hứng?"],
-      ["Nine", "gần hoàn tất", "Mày đã đi xa tới đâu mà chưa công nhận?"],
-      ["Ten", "đỉnh điểm", "Chu kỳ này đang quá đầy ở đâu?"],
-      ["Page", "học trò", "Mày cần học với sự tò mò ở đâu?"],
-      ["Knight", "chuyển động", "Năng lượng này đang lao đi hay đi đúng hướng?"],
-      ["Queen", "nội lực", "Mày đang nuôi dưỡng phẩm chất nào bên trong?"],
-      ["King", "làm chủ", "Chỗ nào cần bản lĩnh trưởng thành hơn?"]
-    ];
-
-    function minorMeaning(rank, suit) {
-      const base = {
-        Cups: "Cảm xúc, tình cảm, lòng trắc ẩn và mối liên hệ với người khác.",
-        Swords: "Tư duy, lời nói, sự thật, áp lực tinh thần và quyết định khó.",
-        Wands: "Lửa hành động, ý tưởng, tham vọng, sáng tạo và động lực.",
-        Pentacles: "Vật chất, tiền bạc, công việc, sức khỏe, thân thể và nền tảng sống."
-      }[suit];
-      return `${base} Lá ${rank} nhấn vào bài học: ${ranks.find(r => r[0] === rank)[1]}.`;
-    }
-
-    const deck = [
-      ...major.map(x => ({ num: x[0], name: x[1], suit: x[2], symbol: x[3], keywords: x[4], question: x[5], meaning: x[6] })),
-      ...Object.keys(suits).flatMap(suit => ranks.map(([rank, key, q], index) => ({
-        num: String(index + 1),
-        name: `${rank} of ${suit}`,
-        suit,
-        symbol: suits[suit][0],
-        keywords: [key, ...suits[suit][1].split(", ").slice(0,2)],
-        question: q,
-        meaning: minorMeaning(rank, suit)
-      })))
-    ];
-
-    let state = loadState();
-    let currentCard = null;
-
-    function loadState() {
-      try {
-        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { entries: [] };
-      } catch {
-        return { entries: [] };
-      }
-    }
-
-    function saveState() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      updateAll();
-    }
-
-    function toast(msg) {
-      const el = document.getElementById("toast");
-      el.textContent = msg;
-      el.classList.add("show");
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => el.classList.remove("show"), 2200);
-    }
-
-    function normalizeCardName(str) {
-      return String(str || "")
-        .toLowerCase()
-        .replace(/ten/g, "10")
-        .replace(/nine/g, "9")
-        .replace(/eight/g, "8")
-        .replace(/seven/g, "7")
-        .replace(/six/g, "6")
-        .replace(/five/g, "5")
-        .replace(/four/g, "4")
-        .replace(/three/g, "3")
-        .replace(/two/g, "2")
-        .replace(/one/g, "ace")
-        .replace(/[^a-z0-9]+/g, " ")
-        .trim();
-    }
-
-    function findCardByName(rawName) {
-      const q = normalizeCardName(rawName);
-      if (!q) return null;
-      return deck.find(c => normalizeCardName(c.name) === q)
-        || deck.find(c => normalizeCardName(c.name).includes(q))
-        || deck.find(c => q.includes(normalizeCardName(c.name)));
-    }
-
-    function loadTypedCard() {
-      const input = document.getElementById("cardNameInput").value;
-      const picker = document.getElementById("cardPicker").value;
-      const card = findCardByName(input || picker);
-      if (!card) {
-        toast("Chưa nhận ra lá này. Thử nhập đúng tiếng Anh: The Fool, Ace of Cups, 10 of Swords...");
-        return;
-      }
-      currentCard = card;
-      document.getElementById("cardNameInput").value = card.name;
-      document.getElementById("cardPicker").value = card.name;
-      renderCard(card);
-      document.getElementById("meaningPanel").style.display = "block";
-      document.getElementById("journalPanel").style.display = "block";
-      document.getElementById("firstFeeling").value = "";
-      document.getElementById("selfMirror").value = "";
-      document.getElementById("tinyAction").value = "";
-      toast("Đã soi: " + currentCard.name);
-    }
-
-    function renderCard(card) {
-      const visual = document.getElementById("visualCard");
-      visual.classList.remove("empty");
-      visual.style.transform = "rotate(" + (Math.random() * 2 - 1).toFixed(2) + "deg)";
-      visual.innerHTML = `<div class="card-num">${card.num} · ${card.suit}</div><div class="card-symbol">${card.symbol}</div><div class="card-name">${card.name}</div>`;
-      document.getElementById("cardTitle").textContent = card.name;
-      document.getElementById("cardSuit").textContent = card.suit;
-      document.getElementById("keywords").innerHTML = card.keywords.map(k => `<span class="tag">${k}</span>`).join("");
-      document.getElementById("reflectionQuestion").textContent = card.question;
-      document.getElementById("meaningText").textContent = card.meaning;
-    }
-
-    function clearDraw() {
-      currentCard = null;
-      document.getElementById("cardNameInput").value = "";
-      document.getElementById("cardPicker").value = "";
-      const visual = document.getElementById("visualCard");
-      visual.classList.add("empty");
-      visual.style.transform = "";
-      visual.innerHTML = `<div class="card-num">TAROT</div><div class="card-symbol">✦</div><div class="card-name">Chưa nhập lá</div>`;
-      document.getElementById("meaningPanel").style.display = "none";
-      document.getElementById("journalPanel").style.display = "none";
-    }
-
-    function saveEntry() {
-      if (!currentCard) return toast("Nhập hoặc chọn lá bài trước đã.");
-      const entry = {
-        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
-        createdAt: new Date().toISOString(),
-        card: currentCard,
-        firstFeeling: document.getElementById("firstFeeling").value.trim(),
-        selfMirror: document.getElementById("selfMirror").value.trim(),
-        tinyAction: document.getElementById("tinyAction").value.trim()
-      };
-      state.entries.unshift(entry);
-      saveState();
-      toast("Đã lưu nhật ký.");
-      switchTab("journal");
-    }
-
-    function renderEntries() {
-      const q = document.getElementById("searchInput").value.toLowerCase().trim();
-      const suit = document.getElementById("filterSuit").value;
-      let entries = state.entries.filter(e => !suit || e.card.suit === suit);
-      if (q) {
-        entries = entries.filter(e => JSON.stringify(e).toLowerCase().includes(q));
-      }
-      document.getElementById("entryCount").textContent = `${state.entries.length} mục`;
-      const list = document.getElementById("entryList");
-      if (!entries.length) {
-        list.innerHTML = `<div class="empty-state">Chưa có nhật ký phù hợp. Rút một lá rồi lưu lại cảm nhận đầu tiên.</div>`;
-        return;
-      }
-      list.innerHTML = entries.map(e => {
-        const date = new Date(e.createdAt).toLocaleDateString("vi-VN", { day:"2-digit", month:"2-digit", year:"numeric" });
-        return `<article class="entry">
-          <div class="entry-head"><h4>${e.card.symbol} ${e.card.name}</h4><div class="entry-date">${date}</div></div>
-          <div class="keywords">${e.card.keywords.map(k => `<span class="tag">${k}</span>`).join("")}</div>
-          ${e.firstFeeling ? `<p><b>Cảm giác:</b> ${escapeHtml(e.firstFeeling)}</p>` : ""}
-          ${e.selfMirror ? `<p><b>Phản chiếu:</b> ${escapeHtml(e.selfMirror)}</p>` : ""}
-          ${e.tinyAction ? `<p><b>Hành động:</b> ${escapeHtml(e.tinyAction)}</p>` : ""}
-          <div class="btn-row"><button class="btn secondary" onclick="reuseEntry('${e.id}')">Xem lại lá</button><button class="btn secondary" onclick="deleteEntry('${e.id}')">Xóa</button></div>
-        </article>`;
-      }).join("");
-    }
-
-    function escapeHtml(str) {
-      return str.replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
-    }
-
-    window.deleteEntry = function(id) {
-      if (!confirm("Xóa mục này?")) return;
-      state.entries = state.entries.filter(e => e.id !== id);
-      saveState();
-      toast("Đã xóa.");
-    };
-
-    window.reuseEntry = function(id) {
-      const entry = state.entries.find(e => e.id === id);
-      if (!entry) return;
-      currentCard = entry.card;
-      renderCard(currentCard);
-      document.getElementById("meaningPanel").style.display = "block";
-      document.getElementById("journalPanel").style.display = "block";
-      switchTab("draw");
-    };
-
-    function updatePatterns() {
-      const entries = state.entries;
-      document.getElementById("totalStat").textContent = entries.length;
-      document.getElementById("majorStat").textContent = entries.filter(e => e.card.suit === "Major Arcana").length;
-      document.getElementById("streakStat").textContent = recentDayCount(entries);
-      const counts = { "Major Arcana":0, Cups:0, Swords:0, Wands:0, Pentacles:0 };
-      entries.forEach(e => counts[e.card.suit] = (counts[e.card.suit] || 0) + 1);
-      const max = Math.max(1, ...Object.values(counts));
-      document.getElementById("suitBars").innerHTML = Object.entries(counts).map(([k,v]) => `
-        <div style="margin:10px 0;">
-          <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:850;"><span>${k}</span><span>${v}</span></div>
-          <div style="height:12px;border-radius:999px;background:rgba(255,255,255,.62);border:1px solid var(--line);overflow:hidden;margin-top:6px;">
-            <div style="height:100%;width:${(v/max)*100}%;background:linear-gradient(90deg,var(--violet),var(--rose));border-radius:999px;"></div>
+        <div class="ritual-step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <h4>Tạo không gian — 2 phút</h4>
+            <p>Ngồi yên. Tắt thông báo. Thở 3 lần chậm. Không cần bàn thờ, không cần nến — chỉ cần mày thật sự có mặt trong khoảnh khắc đó.</p>
           </div>
-        </div>`).join("");
-      document.getElementById("patternText").innerHTML = patternAdvice(counts, entries);
-    }
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <h4>Đặt câu hỏi — cụ thể hơn là mơ hồ</h4>
+            <p>Thay vì hỏi "hôm nay thế nào?", hãy hỏi cụ thể:</p>
+            <ul>
+              <li>"Mình đang không nhìn thấy điều gì?"</li>
+              <li>"Năng lượng nào đang chi phối quyết định này?"</li>
+              <li>"Phần nào trong mình cần chú ý hôm nay?"</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <h4>Xào bài và rút — bằng tay thật</h4>
+            <p>Xào trong khi giữ câu hỏi trong đầu. Cảm nhận bài. Rút 1 lá duy nhất — mới học thì đừng rút 3 lá, bộ não sẽ loạn. Làm chủ 1 lá trước.</p>
+          </div>
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <h4>Nhìn hình ảnh — trước khi đọc nghĩa</h4>
+            <p>Nhìn lá bài thật 30 giây. Hỏi mày thấy gì đầu tiên. Màu sắc nào, nhân vật nào, cảm xúc gì. <strong style="color:var(--gold)">Phản ứng đầu tiên thường là thật nhất.</strong></p>
+          </div>
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <h4>Nhập vào app — đọc nghĩa và câu hỏi</h4>
+            <p>Ghi cảm giác đầu tiên. Đọc từ khóa, ý nghĩa, câu hỏi phản chiếu. Không cần đồng ý 100% — chỉ cần hỏi "phần nào đúng với mình lúc này?".</p>
+          </div>
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <h4>Viết 1 hành động nhỏ — làm được ngay</h4>
+            <p>Không phải kế hoạch lớn. Một việc nhỏ, cụ thể, hôm nay. "Nhắn lời xin lỗi", "ngủ trước 11h", "xem lại file đó", "nói thật với X về Y".</p>
+          </div>
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">7</div>
+          <div class="step-body">
+            <h4>Cuối ngày — kiểm tra lại</h4>
+            <p>Trước khi ngủ, nhớ lại lá bài buổi sáng. Hỏi: "Nó đã xuất hiện ở đâu trong ngày hôm nay mà mày không để ý?" Ghi bổ sung nếu có.</p>
+          </div>
+        </div>
+        <div class="ritual-step">
+          <div class="step-num">8</div>
+          <div class="step-body">
+            <h4>Sau 7 ngày — tìm pattern</h4>
+            <p>Mở tab Pattern. Nhóm lá nào xuất hiện nhiều? Swords liên tiếp? Cups lặp lại? Đây là tín hiệu thật từ thế giới nội tâm của mày, không phải bói toán.</p>
+          </div>
+        </div>
+      </div>
 
-    function recentDayCount(entries) {
-      const set = new Set(entries.map(e => e.createdAt.slice(0,10)));
-      let count = 0;
-      const d = new Date();
-      while (set.has(d.toISOString().slice(0,10))) {
-        count++;
-        d.setDate(d.getDate() - 1);
-      }
-      return count;
-    }
+      <div class="panel">
+        <div class="section-title"><h3>Học Tarot Không Mê Tín</h3></div>
+        <details open>
+          <summary>Tarot là gì — thật ra</summary>
+          <p>Tarot là hệ thống biểu tượng 78 lá, ra đời từ thế kỷ 15 ở Châu Âu. Không phải ma thuật, không phải tiên tri. Là ngôn ngữ của vô thức. Jung gọi đây là archetypal symbols — các hình mẫu nguyên sơ mà não người nhận ra vì chúng phản ánh trải nghiệm chung của nhân loại.</p>
+          <p>Khi mày rút lá, bộ não sẽ tìm cách kết nối hình ảnh với cuộc đời mày. Đó không phải "vận mệnh" — đó là phép chiếu nội tâm (projection). Và phép chiếu đó rất có giá trị.</p>
+        </details>
+        <details>
+          <summary>Lá ngược — có dùng không?</summary>
+          <p>Mới học: <strong style="color:var(--gold)">bỏ qua lá ngược</strong>. Làm chủ xuôi trước. Khi đã quen (sau 3–6 tháng), lá ngược có thể hiểu theo 3 cách:</p>
+          <ul>
+            <li><strong style="color:var(--ink)">Năng lượng bị kẹt:</strong> năng lượng đó có đó nhưng chưa ra được</li>
+            <li><strong style="color:var(--ink)">Quá đà:</strong> đang dùng năng lượng đó quá mức</li>
+            <li><strong style="color:var(--ink)">Hướng nội:</strong> đang xảy ra bên trong, chưa ra ngoài</li>
+          </ul>
+        </details>
+        <details>
+          <summary>Rút 1 lá hay nhiều lá?</summary>
+          <p>Mới học: <strong style="color:var(--gold)">1 lá mỗi ngày, tối thiểu 30 ngày</strong>. Khi quen với từng lá thì mới sang spread nhiều lá. 3-lá phổ biến: Quá khứ · Hiện tại · Tương lai — nhưng tốt hơn là: Vấn đề · Gốc rễ · Hướng hành động.</p>
+        </details>
+        <details>
+          <summary>Khi rút lá cứ bị lá xấu</summary>
+          <p>Không có lá "xấu". The Tower (sụp đổ), Death (kết thúc), The Devil (ràng buộc) — đây là những lá dạy bài học quan trọng nhất. Hỏi: "Tại sao lá này xuất hiện đúng lúc này? Nó đang nói về phần nào trong cuộc sống của mình?" Đánh giá không phải là đọc bài — đó là sợ hãi.</p>
+        </details>
+      </div>
+    </div>
 
-    function patternAdvice(counts, entries) {
-      if (!entries.length) return "Chưa đủ dữ liệu. Cứ rút bài và ghi chú vài ngày, pattern sẽ bắt đầu hiện ra.";
-      const top = Object.entries(counts).sort((a,b) => b[1]-a[1])[0];
-      const lines = [];
-      lines.push(`Nhóm xuất hiện nhiều nhất là <b>${top[0]}</b>.`);
-      if (top[0] === "Swords") lines.push("Có thể giai đoạn này mày đang sống nhiều trong đầu: suy nghĩ, phân tích, căng thẳng, quyết định.");
-      if (top[0] === "Cups") lines.push("Trọng tâm đang nghiêng về cảm xúc, quan hệ, kết nối và nhu cầu được lắng nghe.");
-      if (top[0] === "Wands") lines.push("Năng lượng hành động, tham vọng và ý tưởng đang nổi mạnh. Coi chừng cháy quá nhanh.");
-      if (top[0] === "Pentacles") lines.push("Đời sống vật chất, tiền bạc, sức khỏe, công việc và nền tảng đang đòi chú ý.");
-      if (top[0] === "Major Arcana") lines.push("Nhiều Major nghĩa là nhật ký đang chạm vào các bài học lớn, không chỉ chuyện vụn hằng ngày.");
-      const last = entries.slice(0,3).map(e => e.card.name).join(", ");
-      lines.push(`Ba lá gần nhất: <b>${last}</b>. Hỏi thử: chúng đang kể cùng một câu chuyện gì?`);
-      return lines.map(x => `<p>${x}</p>`).join("");
-    }
+    <!-- SUB-VIEW: QUESTIONS -->
+    <div class="learn-view" id="learn-questions">
+      <div class="panel panel-gold">
+        <div class="section-title"><h3>Ngân Hàng Câu Hỏi</h3></div>
+        <p class="small" style="margin-bottom:14px;">Câu hỏi tốt = đọc bài sâu. Lưu lại mấy cái này, dùng khi rút bài.</p>
 
-    function updatePrompt() {
-      const recent = state.entries.slice(0,7).map(e => ({
-        date: e.createdAt.slice(0,10), card: e.card.name, suit: e.card.suit,
-        keywords: e.card.keywords, feeling: e.firstFeeling, mirror: e.selfMirror, action: e.tinyAction
-      }));
-      document.getElementById("aiPrompt").value = `Mày là người đồng hành phản chiếu nội tâm, không bói toán mê tín. Hãy đọc nhật ký tarot sau theo hướng biểu tượng, Jung/archetype, shadow work và hành động thực tế. Hãy chỉ ra pattern lặp lại, câu hỏi sâu hơn, và 1-3 hành động nhỏ cho ngày mai. Dữ liệu:\n\n${JSON.stringify(recent, null, 2)}`;
-    }
+        <div class="q-category">
+          <div class="q-cat-title">CẢM XÚC & NỘI TÂM</div>
+          <div class="q-item">Mình đang cảm nhận điều gì thật sự, dưới tất cả những lý lẽ kia?</div>
+          <div class="q-item">Phần nào trong mình đang bị bỏ qua hoặc bị dập tắt?</div>
+          <div class="q-item">Nỗi sợ nào đang lái quyết định này, mà mình chưa nhận ra?</div>
+          <div class="q-item">Nếu không có ai phán xét, mình sẽ làm gì?</div>
+          <div class="q-item">Bài học nào mình cứ học đi học lại mà vẫn chưa xong?</div>
+        </div>
 
-    function exportJson() {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = `tarot-reflection-backup-${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-      toast("Đã xuất JSON.");
-    }
+        <div class="q-category">
+          <div class="q-cat-title">QUYẾT ĐỊNH & HÀNH ĐỘNG</div>
+          <div class="q-item">Điều gì mình biết cần làm nhưng cứ trì hoãn?</div>
+          <div class="q-item">Nguồn năng lượng nào mình cần để tiến lên?</div>
+          <div class="q-item">Điều gì cần buông để thứ mới có thể vào?</div>
+          <div class="q-item">Đâu là bước nhỏ nhất mình có thể làm ngay hôm nay?</div>
+          <div class="q-item">Quyết định này phục vụ ai — phiên bản tương lai hay quá khứ của mình?</div>
+        </div>
 
-    function importJson(file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        try {
-          const data = JSON.parse(reader.result);
-          if (!data || !Array.isArray(data.entries)) throw new Error("bad");
-          state = data;
-          saveState();
-          toast("Đã nạp JSON.");
-        } catch {
-          toast("File JSON không đúng định dạng.");
-        }
-      };
-      reader.readAsText(file);
-    }
+        <div class="q-category">
+          <div class="q-cat-title">PATTERN & SHADOW WORK</div>
+          <div class="q-item">Câu chuyện nào mình kể cho bản thân mà chưa chắc là thật?</div>
+          <div class="q-item">Phần tối nào trong mình đang đòi được nhìn nhận?</div>
+          <div class="q-item">Mình đang phóng chiếu điều gì lên người khác mà thật ra là của mình?</div>
+          <div class="q-item">Pattern nào mình muốn phá nhưng cứ quay lại?</div>
+          <div class="q-item">Điều gì trong lá này mình không muốn thấy — và tại sao?</div>
+        </div>
 
-    function wipeData() {
-      if (!confirm("Xóa toàn bộ nhật ký tarot trên máy này?")) return;
-      state = { entries: [] };
-      saveState();
-      toast("Đã xóa toàn bộ dữ liệu.");
-    }
+        <div class="q-category">
+          <div class="q-cat-title">TĂNG TRƯỞNG & MỤC ĐÍCH</div>
+          <div class="q-item">Phiên bản nào của mình đang được mời gọi xuất hiện?</div>
+          <div class="q-item">Năng lượng gì mình cần trau dồi hơn trong giai đoạn này?</div>
+          <div class="q-item">Điều gì mình giỏi mà chưa dám tin vào nó?</div>
+          <div class="q-item">Nếu không có giới hạn nào, mình muốn tạo ra điều gì?</div>
+        </div>
+      </div>
+    </div>
 
-    function switchTab(id) {
-      document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
-      document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === id));
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      updateAll();
-    }
+    <!-- SUB-VIEW: SUITS -->
+    <div class="learn-view" id="learn-suits">
+      <div class="panel">
+        <div class="section-title"><h3>4 Nhóm Lá Minor Arcana</h3></div>
+        <p class="small" style="margin-bottom:14px;">56 lá Minor chia 4 nhóm, mỗi nhóm đại diện một lĩnh vực của cuộc sống.</p>
 
-    function populateCardPicker() {
-      const picker = document.getElementById("cardPicker");
-      if (!picker || picker.options.length > 1) return;
-      const groups = ["Major Arcana", "Cups", "Swords", "Wands", "Pentacles"];
-      groups.forEach(group => {
-        const optgroup = document.createElement("optgroup");
-        optgroup.label = group;
-        deck.filter(c => c.suit === group).forEach(card => {
-          const option = document.createElement("option");
-          option.value = card.name;
-          option.textContent = card.name;
-          optgroup.appendChild(option);
-        });
-        picker.appendChild(optgroup);
-      });
-    }
+        <div class="suit-card">
+          <div class="suit-card-head">
+            <div class="suit-icon">☕</div>
+            <div>
+              <h4>Cups — Cúp / Chén</h4>
+              <div class="suit-element">NGUYÊN TỐ: NƯỚC · MÙAMÙA THU</div>
+            </div>
+          </div>
+          <p>Thế giới cảm xúc, tình yêu, trực giác và các mối quan hệ. Cups hỏi: "Mày đang cảm thấy gì?" Khi Cups xuất hiện nhiều, mày đang sống nhiều trong chiều sâu cảm xúc — tốt nếu tỉnh táo, nguy nếu bị cuốn.</p>
+          <div class="suit-keywords">
+            <span class="suit-kw">Tình yêu</span><span class="suit-kw">Cảm xúc</span><span class="suit-kw">Quan hệ</span>
+            <span class="suit-kw">Trực giác</span><span class="suit-kw">Ước mơ</span><span class="suit-kw">Kết nối</span>
+          </div>
+        </div>
 
-    function updateAll() {
-      populateCardPicker();
-      renderEntries();
-      updatePatterns();
-      updatePrompt();
-    }
+        <div class="suit-card">
+          <div class="suit-card-head">
+            <div class="suit-icon">⚔</div>
+            <div>
+              <h4>Swords — Kiếm</h4>
+              <div class="suit-element">NGUYÊN TỐ: KHÍ · MÙA ĐÔNG</div>
+            </div>
+          </div>
+          <p>Tư duy, logic, xung đột, sự thật và quyết định. Swords là nhóm khó chịu nhất nhưng trung thực nhất. Khi Swords xuất hiện, có điều gì đó đang đòi được nhìn thẳng — xung đột, sự thật đau, hoặc cái đầu đang quá tải.</p>
+          <div class="suit-keywords">
+            <span class="suit-kw">Sự thật</span><span class="suit-kw">Quyết định</span><span class="suit-kw">Xung đột</span>
+            <span class="suit-kw">Tư duy</span><span class="suit-kw">Áp lực</span><span class="suit-kw">Rõ ràng</span>
+          </div>
+        </div>
 
-    document.querySelectorAll(".tab").forEach(btn => btn.addEventListener("click", () => switchTab(btn.dataset.tab)));
-    document.getElementById("loadCardBtn").addEventListener("click", loadTypedCard);
-    document.getElementById("cardNameInput").addEventListener("keydown", e => {
-      if (e.key === "Enter") loadTypedCard();
-    });
-    document.getElementById("cardPicker").addEventListener("change", e => {
-      document.getElementById("cardNameInput").value = e.target.value;
-      if (e.target.value) loadTypedCard();
-    });
-    document.getElementById("clearDrawBtn").addEventListener("click", clearDraw);
-    document.getElementById("saveEntryBtn").addEventListener("click", saveEntry);
-    document.getElementById("searchInput").addEventListener("input", renderEntries);
-    document.getElementById("filterSuit").addEventListener("change", renderEntries);
-    document.getElementById("exportBtn").addEventListener("click", exportJson);
-    document.getElementById("importFile").addEventListener("change", e => e.target.files[0] && importJson(e.target.files[0]));
-    document.getElementById("wipeBtn").addEventListener("click", wipeData);
-    document.getElementById("copyPromptBtn").addEventListener("click", async () => {
-      await navigator.clipboard.writeText(document.getElementById("aiPrompt").value);
-      toast("Đã copy prompt AI.");
-    });
+        <div class="suit-card">
+          <div class="suit-card-head">
+            <div class="suit-icon">🔥</div>
+            <div>
+              <h4>Wands — Gậy / Đũa</h4>
+              <div class="suit-element">NGUYÊN TỐ: LỬA · MÙA XUÂN</div>
+            </div>
+          </div>
+          <p>Hành động, đam mê, sáng tạo, tham vọng và ý chí. Wands là năng lượng khởi tạo. Khi Wands xuất hiện nhiều, mày đang ở pha hành động cao — coi chừng đốt năng lượng quá nhanh, cần cân bằng với chiều sâu.</p>
+          <div class="suit-keywords">
+            <span class="suit-kw">Hành động</span><span class="suit-kw">Đam mê</span><span class="suit-kw">Sáng tạo</span>
+            <span class="suit-kw">Tham vọng</span><span class="suit-kw">Lãnh đạo</span><span class="suit-kw">Ý chí</span>
+          </div>
+        </div>
 
-    updateAll();
-  </script></body>
+        <div class="suit-card">
+          <div class="suit-card-head">
+            <div class="suit-icon">◆</div>
+            <div>
+              <h4>Pentacles — Đồng xu / Ngôi sao</h4>
+              <div class="suit-element">NGUYÊN TỐ: ĐẤT · MÙA HÈ</div>
+            </div>
+          </div>
+          <p>Vật chất, tiền bạc, sức khỏe, thân thể và nền tảng sống. Pentacles là nhóm chậm nhất — về sự bền vững. Khi Pentacles xuất hiện, hỏi: "Nền tảng nào cần được xây hoặc củng cố?"</p>
+          <div class="suit-keywords">
+            <span class="suit-kw">Tiền bạc</span><span class="suit-kw">Sức khỏe</span><span class="suit-kw">Công việc</span>
+            <span class="suit-kw">Nền tảng</span><span class="suit-kw">Thân thể</span><span class="suit-kw">Bền vững</span>
+          </div>
+        </div>
+
+        <div class="panel" style="background:rgba(10,7,16,0.5);margin-top:4px;">
+          <div class="section-title"><h3>Cấp Bậc Trong Mỗi Nhóm</h3></div>
+          <details>
+            <summary>Ace → 10: hành trình năng lượng</summary>
+            <p>Ace là mầm thuần khiết nhất. Tiến qua 2→9 là hành trình học bài học của nhóm đó. 10 là đỉnh điểm — hoặc hoàn thành, hoặc quá tải. <strong style="color:var(--gold)">Số lẻ (1,3,5,7,9) thường là hành động; số chẵn (2,4,6,8,10) thường là ổn định hoặc lựa chọn.</strong></p>
+          </details>
+          <details>
+            <summary>Page · Knight · Queen · King: các dạng trưởng thành</summary>
+            <ul>
+              <li><strong style="color:var(--ink)">Page:</strong> học trò — tò mò, mới bắt đầu, đang học năng lượng của nhóm đó</li>
+              <li><strong style="color:var(--ink)">Knight:</strong> chiến binh trẻ — năng lượng mạnh nhưng chưa tinh tế, dễ quá đà</li>
+              <li><strong style="color:var(--ink)">Queen:</strong> làm chủ bên trong — nuôi dưỡng, sâu sắc, tự biết mình</li>
+              <li><strong style="color:var(--ink)">King:</strong> làm chủ ra ngoài — dẫn dắt, quyết định, chịu trách nhiệm</li>
+            </ul>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW: MAJOR ARCANA JOURNEY -->
+    <div class="learn-view" id="learn-major">
+      <div class="panel panel-gold">
+        <div class="section-title"><h3>Hành Trình Fool — 22 Lá Major</h3></div>
+        <p class="small" style="margin-bottom:14px;">22 lá Major không ngẫu nhiên — chúng kể một hành trình trưởng thành. The Fool (0) bước vào, The World (XXI) hoàn tất. Ở giữa là tất cả những bài học của một đời người.</p>
+      </div>
+
+      <div class="journey-phase">
+        <h4>⚡ Giai đoạn 1: Ra đời & Định hình (0 → V)</h4>
+        <p>The Fool bước vào đời với sự ngây thơ. Magician học dùng công cụ. High Priestess khám phá nội tâm. Empress nuôi dưỡng. Emperor xây cấu trúc. Hierophant học từ hệ thống.</p>
+        <div class="journey-cards">
+          <span class="journey-card-tag">0 The Fool</span>
+          <span class="journey-card-tag">I Magician</span>
+          <span class="journey-card-tag">II High Priestess</span>
+          <span class="journey-card-tag">III Empress</span>
+          <span class="journey-card-tag">IV Emperor</span>
+          <span class="journey-card-tag">V Hierophant</span>
+        </div>
+      </div>
+
+      <div class="journey-phase">
+        <h4>💫 Giai đoạn 2: Lựa chọn & Thử thách (VI → XI)</h4>
+        <p>Lovers đối mặt với lựa chọn giá trị. Chariot học kiểm soát lực kéo ngược. Strength thuần hóa bản năng. Hermit tìm ánh sáng riêng. Wheel of Fortune đối diện sự vô thường. Justice học trách nhiệm.</p>
+        <div class="journey-cards">
+          <span class="journey-card-tag">VI Lovers</span>
+          <span class="journey-card-tag">VII Chariot</span>
+          <span class="journey-card-tag">VIII Strength</span>
+          <span class="journey-card-tag">IX Hermit</span>
+          <span class="journey-card-tag">X Wheel</span>
+          <span class="journey-card-tag">XI Justice</span>
+        </div>
+      </div>
+
+      <div class="journey-phase">
+        <h4>🌑 Giai đoạn 3: Chết & Tái sinh (XII → XVII)</h4>
+        <p>Đây là giai đoạn khó nhất — nhưng sâu nhất. Hanged Man đảo góc nhìn. Death buông thứ cũ. Temperance chữa lành. Devil nhìn rõ ràng buộc. Tower phá ảo tưởng. Star tìm lại hy vọng.</p>
+        <div class="journey-cards">
+          <span class="journey-card-tag">XII Hanged Man</span>
+          <span class="journey-card-tag">XIII Death</span>
+          <span class="journey-card-tag">XIV Temperance</span>
+          <span class="journey-card-tag">XV Devil</span>
+          <span class="journey-card-tag">XVI Tower</span>
+          <span class="journey-card-tag">XVII Star</span>
+        </div>
+      </div>
+
+      <div class="journey-phase">
+        <h4>☀ Giai đoạn 4: Tích hợp & Hoàn tất (XVIII → XXI)</h4>
+        <p>Moon đối diện vô thức và nỗi sợ. Sun tìm lại sự trong trẻo. Judgement thức tỉnh và trả lời tiếng gọi. The World hoàn tất một chu kỳ và chuẩn bị vòng mới.</p>
+        <div class="journey-cards">
+          <span class="journey-card-tag">XVIII Moon</span>
+          <span class="journey-card-tag">XIX Sun</span>
+          <span class="journey-card-tag">XX Judgement</span>
+          <span class="journey-card-tag">XXI The World</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="section-title"><h3>Khi Rút Được Major Arcana</h3></div>
+        <p class="small">Major không phải "quan trọng hơn" Minor. Nhưng nó thường chỉ đến những chủ đề lớn — bài học dài hạn, bước ngoặt, hoặc năng lượng nguyên mẫu đang hoạt động trong cuộc sống của mày.</p>
+        <details style="margin-top:10px;">
+          <summary>Cách đọc Major sâu hơn</summary>
+          <ul>
+            <li>Hỏi: "Archetype này đang xuất hiện như thế nào trong đời mình?"</li>
+            <li>Hỏi: "Mình đang ở giai đoạn nào của hành trình này?"</li>
+            <li>Nếu cùng một Major xuất hiện nhiều lần — đây là bài học mày chưa xong.</li>
+            <li>Major liên tiếp trong nhiều ngày = thời điểm chuyển hóa lớn.</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+
+    <!-- SUB-VIEW: ENCYCLOPEDIA -->
+    <div class="learn-view" id="learn-encyclopedia">
+      <div class="panel">
+        <div class="section-title"><h3>Tra Cứu 78 Lá Bài</h3></div>
+        <div class="card-search-row">
+          <input id="encycSearch" placeholder="Tìm lá bài..." autocomplete="off" />
+          <select id="encycFilter">
+            <option value="">Tất cả</option>
+            <option value="Major Arcana">Major</option>
+            <option value="Cups">Cups</option>
+            <option value="Swords">Swords</option>
+            <option value="Wands">Wands</option>
+            <option value="Pentacles">Pentacles</option>
+          </select>
+        </div>
+        <div class="card-grid" id="encyclopediaList"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ JOURNAL ═══ -->
+  <section id="journal" class="view">
+    <div class="panel">
+      <div class="section-title"><h3>Nhật Ký</h3><span class="small-label" id="entryCount">0 MỤC</span></div>
+      <div class="search-row">
+        <input id="searchInput" placeholder="Tìm theo lá bài, cảm xúc..." />
+        <select id="filterSuit">
+          <option value="">Tất cả</option>
+          <option value="Major Arcana">Major</option>
+          <option value="Cups">Cups</option>
+          <option value="Swords">Swords</option>
+          <option value="Wands">Wands</option>
+          <option value="Pentacles">Pentacles</option>
+        </select>
+      </div>
+      <div class="list" id="entryList"></div>
+    </div>
+  </section>
+
+  <!-- ═══ PATTERNS ═══ -->
+  <section id="patterns" class="view">
+    <div class="panel panel-gold">
+      <div class="section-title"><h3>Pattern Của Mày</h3><span class="small-label">TỪ NHẬT KÝ</span></div>
+      <div class="stat-grid">
+        <div class="stat"><strong id="totalStat">0</strong><span>Lần rút</span></div>
+        <div class="stat"><strong id="majorStat">0</strong><span>Major</span></div>
+        <div class="stat"><strong id="streakStat">0</strong><span>Ngày liên tiếp</span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-title"><h3>Nhận Định</h3><span class="small-label">PHÂN TÍCH</span></div>
+      <div id="patternText" class="small"></div>
+    </div>
+    <div class="panel">
+      <div class="section-title"><h3>Tần Suất Nhóm Lá</h3></div>
+      <div id="suitBars"></div>
+    </div>
+  </section>
+
+  <!-- ═══ DATA ═══ -->
+  <section id="data" class="view">
+    <div class="panel">
+      <div class="section-title"><h3>Dữ Liệu</h3><span class="small-label">LOCAL JSON</span></div>
+      <p class="small">Nhật ký lưu trong localStorage của trình duyệt. Đổi máy hoặc xóa trình duyệt là mất — nên backup JSON định kỳ.</p>
+      <div class="btn-row">
+        <button class="btn teal-btn" id="exportBtn">Xuất JSON</button>
+        <label class="file-label" for="importFile">Nạp JSON</label>
+        <input type="file" id="importFile" accept="application/json,.json" />
+      </div>
+      <div class="btn-row single" style="margin-top:8px;">
+        <button class="btn danger" id="wipeBtn">Xóa toàn bộ dữ liệu</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="section-title"><h3>Prompt AI Phản Chiếu</h3><span class="small-label">GPT / CLAUDE</span></div>
+      <textarea id="aiPrompt" readonly style="min-height:130px;font-size:12px;"></textarea>
+      <div class="btn-row single"><button class="btn secondary" id="copyPromptBtn">Copy prompt</button></div>
+    </div>
+  </section>
+
+</main>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="draw"><span>✦</span>Rút</button>
+  <button class="tab" data-tab="guide"><span>☽</span>Học</button>
+  <button class="tab" data-tab="journal"><span>✎</span>Nhật ký</button>
+  <button class="tab" data-tab="patterns"><span>◈</span>Pattern</button>
+  <button class="tab" data-tab="data"><span>⇄</span>Dữ liệu</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = "tarot_reflection_os_v1";
+document.getElementById("todayPill").textContent = new Date().toLocaleDateString("vi-VN", { weekday:"short", day:"2-digit", month:"2-digit" });
+
+/* ═══ DECK DATA ═══ */
+const major = [
+  ["0","The Fool","Major Arcana","✦",["khởi đầu","ngây thơ","dấn thân"],"Mày đang được mời bước vào điều gì, dù chưa chắc chắn?","Một khởi đầu mới, sự tự do, niềm tin ban đầu. Cũng nhắc coi chừng hấp tấp.","Archetype người mới bắt đầu hành trình. Mang theo tất cả mà không sợ rơi. Năng lượng Zero — trước khi mọi thứ được định hình.","Khi nào mày sẵn sàng bắt đầu mà không cần đủ điều kiện? Điều gì đang giữ mày ở ngưỡng cửa?","Sự liều lĩnh vô trách nhiệm, không học từ quá khứ, hấp tấp không suy nghĩ"],
+  ["I","The Magician","Major Arcana","✴",["ý chí","công cụ","tạo tác"],"Trong tay mày đã có công cụ gì mà mày đang quên dùng?","Năng lực biến ý tưởng thành hành động. Tập trung ý chí và dùng thứ đang có.","Archetype nhà sáng tạo — người biết kết nối đất trời, dùng ý chí để hiện thực hóa. Có đủ 4 yếu tố: Cups (cảm xúc), Swords (tư duy), Wands (ý chí), Pentacles (hành động vật chất).","Mày có gì trong tay mà chưa dám dùng hết? Điều gì cản trở mày tập trung ý chí vào một mục tiêu?","Thao túng, dùng kỹ năng để lừa dối, tự sabotage"],
+  ["II","The High Priestess","Major Arcana","☾",["trực giác","bí mật","lắng nghe"],"Trực giác đang nói nhỏ điều gì mà lý trí mày lấn át?","Sự im lặng, tri thức ẩn, cảm nhận sâu. Đừng vội phán xét.","Archetype người giữ tri thức ẩn. Ngồi giữa hai cột đối lập — ánh sáng và bóng tối. Nhắc nhở: không phải lúc nào cũng nên nói ra, hành động hay quyết định ngay.","Điều gì đang xảy ra ở tầng dưới của tình huống này? Mày đang bỏ qua tín hiệu nào vì muốn nghe điều mình thích?","Bí mật có hại, cô lập, không chia sẻ thông tin quan trọng"],
+  ["III","The Empress","Major Arcana","❀",["nuôi dưỡng","sáng tạo","sinh sôi"],"Thứ gì trong đời mày cần được chăm thay vì bị ép?","Năng lượng nuôi dưỡng, sáng tạo, thân thể, thiên nhiên, sự đủ đầy.","Archetype Mẹ — không phải người mẹ sinh học, mà là nguyên lý nuôi dưỡng: sự phong phú, sáng tạo, cơ thể, thiên nhiên, cảm giác đủ đầy. Venus là hành tinh cai quản.","Mày đang đối xử với thân thể và sức sáng tạo của mình như thế nào? Điều gì trong đời cần được chăm sóc thay vì bị ép tiến?","Phụ thuộc, nuông chiều thái quá, không có ranh giới"],
+  ["IV","The Emperor","Major Arcana","♔",["kỷ luật","cấu trúc","quyền lực"],"Chỗ nào cần luật chơi rõ ràng hơn?","Cấu trúc, trách nhiệm, biên giới, lãnh đạo. Đừng để kiểm soát thành cứng nhắc.","Archetype Cha — quyền lực, cấu trúc, kỷ luật. Mars là hành tinh cai quản. Khác Empress ở chỗ: kiểm soát từ bên ngoài thay vì nuôi dưỡng từ bên trong.","Mày đang kiểm soát hay đang dẫn dắt? Có cấu trúc nào đang cứng nhắc quá mức mà mày cần mềm hóa?","Độc đoán, kiểm soát qua sợ hãi, cứng nhắc không linh hoạt"],
+  ["V","The Hierophant","Major Arcana","☷",["truyền thống","học đạo","hệ thống"],"Mày đang học từ hệ thống nào, và hệ nào cần phá?","Niềm tin, thầy dạy, truyền thống, cộng đồng. Học luật trước khi vượt luật.","Archetype thầy dạy và hệ thống niềm tin. Jupiter cai quản. Không nhất thiết là tôn giáo — có thể là mentor, triết học, công ty, văn hóa mày sinh ra trong đó.","Ai hoặc hệ thống nào đang định hình niềm tin của mày? Đâu là chỗ mày đang tuân thủ mà không thật sự tin vào nó?","Tuân thủ mù quáng, giáo điều, dùng truyền thống để kiểm soát"],
+  ["VI","The Lovers","Major Arcana","♡",["lựa chọn","kết nối","giá trị"],"Lựa chọn này có khớp với giá trị thật của mày không?","Tình yêu, liên minh, lựa chọn đạo đức. Sự hòa hợp cần trung thực.","Archetype của sự hợp nhất và lựa chọn giá trị. Gemini — air sign, về kết nối và giao tiếp. Không chỉ về tình yêu — về việc chọn sống với giá trị thật.","Mày đang lựa chọn từ tình yêu hay từ sợ hãi? Điều gì trong cuộc sống hiện tại không còn phù hợp với giá trị cốt lõi của mày?","Bất hòa nội tâm, lựa chọn sai giá trị, hy sinh bản thân vì người khác"],
+  ["VII","The Chariot","Major Arcana","☄",["tiến lên","kiểm soát","chiến thắng"],"Mày cần cầm cương lại phần nào để đi đúng hướng?","Ý chí tiến tới, điều phối lực kéo ngược nhau. Thắng bằng định hướng.","Archetype người chiến thắng qua kỷ luật và ý chí. Cancer — một nghịch lý: sign mềm mại cai quản lá về ý chí mạnh mẽ. Thắng không phải bằng sức — bằng cách cầm cương các lực đối nghịch.","Lực nào đang kéo mày theo các hướng khác nhau? Mày đang dùng ý chí để đi đúng hướng hay để ép bản thân?","Mất kiểm soát, hung hãng, thắng bằng mọi giá"],
+  ["VIII","Strength","Major Arcana","∞",["dịu mà mạnh","can đảm","thuần hóa"],"Mày có thể mềm hơn ở đâu mà vẫn không yếu?","Sức mạnh nội tâm, kiên nhẫn, thuần hóa bản năng bằng sự dịu dàng.","Leo cai quản. Hình ảnh người phụ nữ nhẹ nhàng mở miệng sư tử — sức mạnh thật không cần gào thét. Thuần hóa bản năng bằng tình yêu thương, không phải bằng ép buộc.","Bản năng nào trong mày đang cần được thuần hóa thay vì bị triệt tiêu? Mày đang dùng sức mạnh hay đang dùng sự dịu dàng?","Thiếu tự tin, bị cảm xúc kiểm soát, dùng sức mạnh thô"],
+  ["IX","The Hermit","Major Arcana","♜",["ẩn tu","tìm kiếm","ánh đèn"],"Mày cần ở một mình để hiểu rõ điều gì?","Lùi lại, soi bên trong, tìm ánh sáng riêng. Cô độc có chủ đích.","Virgo cai quản. The Hermit không bỏ trốn — ông đang tìm. Cây đèn không phải để soi đường cho người khác — mà để mày tìm thấy mình trong bóng tối.","Điều gì mày biết trong lòng mà chưa sẵn sàng thừa nhận ra ngoài? Khi nào lần cuối mày thật sự ở một mình để lắng nghe bên trong?","Cô lập vì sợ hãi, từ chối kết nối, mắc kẹt trong bóng tối"],
+  ["X","Wheel of Fortune","Major Arcana","◎",["chu kỳ","cơ hội","đổi vận"],"Chu kỳ nào đang xoay, và mày nên thích nghi sao?","Biến động, cơ hội, thời vận. Đừng bám cứng vào một trạng thái.","Jupiter cai quản. Bánh xe không ngừng xoay — không ai mãi ở trên đỉnh, không ai mãi ở đáy. Câu hỏi không phải 'bánh xe đang ở đâu?' mà 'mày đứng ở trung tâm hay bám vào vành ngoài?'","Mày đang bám vào điều gì vì sợ thay đổi? Chu kỳ nào trong đời đang kết thúc để nhường chỗ cho chu kỳ mới?","Kháng cự thay đổi, không chịu buông, sợ vận xấu"],
+  ["XI","Justice","Major Arcana","⚖",["công bằng","hệ quả","sự thật"],"Sự thật nào cần được nhìn thẳng, không né?","Cân bằng, quyết định, trách nhiệm với hệ quả. Rõ ràng và công minh.","Libra cai quản. Justice không phải karma theo nghĩa trả đũa — mà là nhân quả tự nhiên. Mọi quyết định đều có hệ quả. Lá này hỏi: mày có đang sống thẳng thắn không?","Hệ quả nào của quyết định cũ đang đến? Có điều gì mày cần thừa nhận thẳng thắn thay vì né tránh?","Thiên vị, không nhận trách nhiệm, phán xét bất công"],
+  ["XII","The Hanged Man","Major Arcana","☌",["tạm dừng","đảo góc","buông"],"Nếu nhìn ngược lại, vấn đề này sẽ khác ra sao?","Dừng lại để đổi góc nhìn. Buông kiểm soát cũ để thấy điều mới.","Neptune cai quản. Người bị treo không đau khổ — khuôn mặt bình thản. Đây là sự dừng lại tự nguyện để nhìn từ góc khác. Đôi khi không làm gì là hành động thông minh nhất.","Điều gì mày đang cố kiểm soát mà cần buông ra? Nếu nhìn tình huống này từ góc hoàn toàn ngược lại, mày thấy gì?","Trì hoãn vì sợ, hy sinh bản thân vô lý, mắc kẹt không chịu thay đổi"],
+  ["XIII","Death","Major Arcana","✧",["kết thúc","chuyển hóa","lột xác"],"Thứ gì đã hết vai trò nhưng mày vẫn giữ?","Không nhất thiết là chết chóc. Là kết thúc cần thiết để tái sinh.","Scorpio cai quản. Hình ảnh thường gây sợ nhưng Death là một trong những lá tích cực nhất. Không thể có mùa xuân nếu không có mùa đông. Con bướm không thể bay nếu sâu không chết đi trong kén.","Điều gì đã hết vai trò trong đời mày nhưng mày vẫn giữ vì quen? Phiên bản nào của bản thân mày cần chết để phiên bản mới ra đời?","Chống lại sự thay đổi, bám víu vào cái đã chết, sợ hãi kết thúc"],
+  ["XIV","Temperance","Major Arcana","⚗",["pha trộn","điều độ","chữa lành"],"Hai cực nào cần được pha lại cho vừa?","Điều độ, chữa lành, phối hợp. Đi chậm mà bền.","Sagittarius cai quản. Thiên thần rót nước giữa hai cốc — tìm điểm cân bằng. Không phải ở giữa bằng cách không chọn gì — mà pha trộn một cách có chủ ý để tạo ra thứ mới.","Mày đang cực đoan ở đâu mà cần điều hòa lại? Hai thứ tưởng như đối lập nào trong đời mày có thể kết hợp?","Mất cân bằng, quá đà, thiếu kiên nhẫn"],
+  ["XV","The Devil","Major Arcana","♆",["ràng buộc","ám ảnh","dục vọng"],"Thứ gì đang trói mày nhưng mày gọi nó là lựa chọn?","Sự lệ thuộc, cám dỗ, bóng tối. Nhìn rõ dây xích là bước đầu tháo nó.","Capricorn cai quản. Hai nhân vật bị xích — nhưng xích rộng lỏng. Họ có thể tự tháo ra. The Devil hỏi: mày đang bị trói bởi cái gì, và liệu mày có thật sự muốn thoát ra không?","Mày đang gọi sự nghiện ngập hay ràng buộc đó là 'lựa chọn'? Điều gì mày tưởng mày kiểm soát nhưng thật ra nó đang kiểm soát mày?","Giải phóng khỏi ràng buộc, nhìn rõ bản chất thật của vấn đề"],
+  ["XVI","The Tower","Major Arcana","⚡",["sụp đổ","sự thật","giải phóng"],"Hệ cũ nào đang nứt, dù mày cố chống?","Cú sốc phá ảo tưởng. Đau nhưng giải phóng khỏi nền móng sai.","Mars cai quản. Tower không phải lá xấu — là lá đau. Nhưng nó chỉ phá những gì được xây trên nền móng không vững. Nếu mày thật sự, nền móng thật sự không gì phá được.","Cấu trúc nào trong đời mày — niềm tin, mối quan hệ, kế hoạch — đang được xây trên nền sai? Điều gì mày biết cần phá bỏ nhưng cứ trì hoãn?","Tránh thảm họa bằng cách xây lại nền móng đúng trước"],
+  ["XVII","The Star","Major Arcana","✶",["hy vọng","hồi phục","định hướng"],"Điều gì vẫn còn sáng, dù nhỏ?","Hy vọng, lành lại, niềm tin sau bão. Trở về với sự trong trẻo.","Aquarius cai quản. Sau cơn bão Tower, The Star là làn gió lành. Người phụ nữ rót nước ra — không giữ lại. Hy vọng không phải thụ động chờ đợi mà là tiếp tục chảy.","Trong đống đổ vỡ hiện tại, điều gì vẫn còn sáng? Mày cần được chữa lành ở đâu mà cứ bỏ qua?","Mất hy vọng, bi quan, không tin vào khả năng hồi phục"],
+  ["XVIII","The Moon","Major Arcana","☽",["mơ hồ","sợ hãi","vô thức"],"Nỗi sợ nào đang làm hình ảnh méo đi?","Mơ hồ, giấc mơ, cảm xúc ngầm. Đừng quyết lớn khi đang quá nhiễu.","Pisces cai quản. Moon là lá của ảo giác và vô thức. Con đường dưới trăng mờ — mày không thấy rõ. Tốt nhất: đừng quyết định lớn khi đang trong pha Moon.","Nỗi sợ nào đang bóp méo cách mày nhìn tình huống này? Điều gì đang ẩn trong vô thức mà ảnh hưởng đến hành vi của mày?","Rõ ràng trở lại, đối mặt với nỗi sợ, ánh sáng xua tan bóng tối"],
+  ["XIX","The Sun","Major Arcana","☀",["rõ ràng","sống động","niềm vui"],"Điều gì làm mày sống động thật?","Ánh sáng, thành thật, sức sống, niềm vui đơn giản. Mọi thứ rõ hơn.","Sun — đơn giản là một trong những lá tích cực nhất bộ. Nhưng không phải ngây thơ — The Sun chiếu sáng tất cả, kể cả thứ mày muốn giấu. Sự thật trở nên rõ ràng, và đó là điều tốt.","Khi nào mày cảm thấy sống động và tự nhiên nhất? Điều gì mày đang che giấu mà cần được đưa ra ánh sáng?","Kiêu ngạo, ảo tưởng về bản thân, thành công che lấp sự thật"],
+  ["XX","Judgement","Major Arcana","♩",["thức tỉnh","tiếng gọi","tái sinh"],"Tiếng gọi nào trong mày lâu rồi chưa trả lời?","Thức tỉnh, tổng kết, được gọi sống đúng hơn. Đừng ngủ tiếp.","Pluto cai quản. Judgement là khoảnh khắc thức tỉnh — tiếng kèn thổi và những người đứng dậy từ quan tài. Không phải sợ hãi — mà là được gọi về đúng với bản chất thật.","Tiếng gọi nào trong mày — về nghề nghiệp, mối quan hệ, cách sống — mày đang giả vờ không nghe thấy? Nếu được sống lại từ đầu, mày sẽ làm gì khác?","Bỏ qua tiếng gọi, tự phán xét quá khắt khe, không chịu tha thứ cho bản thân"],
+  ["XXI","The World","Major Arcana","◉",["hoàn tất","tích hợp","chu kỳ mới"],"Một chu kỳ nào đã đủ đầy để khép lại?","Hoàn thành, tích hợp, trưởng thành. Kết thúc này mở ra vòng mới.","Saturn cai quản. Người phụ nữ nhảy múa trong vòng nguyệt quế — tự do nhưng trong một khung nhất định. Hoàn tất không phải kết thúc — mà là sự tích hợp tất cả bài học để bắt đầu vòng mới ở tầng cao hơn.","Điều gì mày đã học xong và cần công nhận? Chu kỳ nào đang kết thúc, và mày cần khép lại nó như thế nào?","Trì hoãn hoàn tất, không chịu công nhận thành tựu, sợ bắt đầu mới"]
+];
+
+const suits = {
+  Cups:      ["☕","cảm xúc, tình yêu, kết nối"],
+  Swords:    ["⚔","suy nghĩ, sự thật, xung đột"],
+  Wands:     ["🔥","hành động, đam mê, ý chí"],
+  Pentacles: ["◆","tiền bạc, thân thể, công việc"]
+};
+
+const ranks = [
+  ["Ace","mầm mới","Mầm năng lượng mới đang xuất hiện ở đâu?","Năng lượng thuần khiết nhất của nhóm. Tiềm năng chưa được hình thành. Một cơ hội đang mở ra nếu mày sẵn sàng nắm lấy.","Điều mới nào đang gõ cửa? Mày có đang bỏ lỡ cơ hội vì quá bận với cái cũ?","Cơ hội bị lãng phí, từ chối sự khởi đầu"],
+  ["Two","lựa chọn","Mày đang đứng giữa hai lực nào?","Điểm giao giữa hai năng lượng, hai khả năng. Cần cân bằng hoặc đưa ra lựa chọn có ý thức.","Mày đang cân bằng điều gì? Lựa chọn nào mày đang né tránh?","Thiếu quyết đoán, mất cân bằng"],
+  ["Three","phát triển","Điều gì cần cộng tác hoặc mở rộng?","Năng lượng ban đầu được mở rộng ra ngoài, bắt đầu kết hợp với thế giới. Cộng tác, sáng tạo nhóm.","Mày đang xây gì cùng với ai? Điều gì cần thêm sức người để phát triển?","Cô lập, từ chối hợp tác"],
+  ["Four","ổn định","Sự ổn định này là nền hay là kẹt?","Cấu trúc vững chắc được hình thành. Nhưng bốn là số của sự cứng nhắc — ổn định có thể thành trì hoãn.","Mày đang dừng để nghỉ hay đang mắc kẹt? Sự an toàn này phục vụ mày hay giữ mày lại?","Trì trệ, sợ thay đổi, bảo thủ"],
+  ["Five","xung đột","Va chạm nào đang đòi mày tỉnh hơn?","Giai đoạn khủng hoảng và thách thức. Sự ổn định của Bốn bị phá vỡ. Đau nhưng cần thiết để phát triển.","Mày đang học được gì từ sự xung đột này? Điều gì cần thay đổi để ra khỏi giai đoạn này?","Mất mát không cần thiết, thất bại do thiếu kiên nhẫn"],
+  ["Six","dịch chuyển","Điều gì đang đi qua giai đoạn mềm hơn?","Sau khủng hoảng là giai đoạn hòa giải và dịch chuyển. Cân bằng mới đang hình thành.","Mày đang rời xa điều gì và tiến về đâu? Ai hoặc điều gì đang giúp mày qua giai đoạn này?","Từ chối sự trợ giúp, không chịu buông bỏ"],
+  ["Seven","thử thách","Mày cần bảo vệ điều gì?","Thử thách tinh thần — cần chiến lược, không chỉ cần nỗ lực. Câu hỏi về tính xác thực và lòng can đảm.","Mày đang chiến đấu cho điều gì thật sự quan trọng? Có thể có cách tiếp cận thông minh hơn không?","Thiếu chiến lược, lừa dối bản thân"],
+  ["Eight","tiến trình","Việc gì cần nhịp đều thay vì cảm hứng?","Nhịp điệu đều đặn, kỹ năng được rèn giũa. Tiến trình qua sự lặp lại có chủ đích.","Kỹ năng nào mày cần rèn mỗi ngày? Điều gì cần sự kiên nhẫn thay vì kết quả ngay?","Bị kẹt trong routine, hoặc bỏ cuộc trước khi thành thạo"],
+  ["Nine","gần hoàn tất","Mày đã đi xa tới đâu mà chưa công nhận?","Gần đến đích — nhưng đây cũng là lúc tự sabotage dễ xảy ra nhất. Nhìn lại đường đã đi.","Mày đã đạt được gì mà chưa tự công nhận? Điều gì đang kéo mày lại ở vạch cuối này?","Tự sabotage, không tin vào thành công sắp đến"],
+  ["Ten","đỉnh điểm","Chu kỳ này đang quá đầy ở đâu?","Chu kỳ hoàn tất — hoặc viên mãn hoặc quá tải. Cả hai đều cần buông để chu kỳ mới bắt đầu.","Điều gì đã hoàn thành? Mày đang giữ quá nhiều thứ vì sợ mất?","Quá tải, bám víu, không chịu khép lại chu kỳ"],
+  ["Page","học trò","Mày cần học với sự tò mò ở đâu?","Tinh thần người mới học — tò mò, cởi mở, chưa bị định kiến. Năng lượng ban đầu, thông điệp đang đến.","Mày cần đặt câu hỏi nào mà trước giờ không dám hỏi? Điều gì mày cần học như người mới?","Thiếu nghiêm túc, hời hợt"],
+  ["Knight","chuyển động","Năng lượng này đang lao đi hay đi đúng hướng?","Năng lượng mạnh nhất của nhóm — nhưng chưa có độ sâu của Queen hay King. Hành động nhanh, quyết tâm cao, cần kiểm soát hướng đi.","Mày đang lao về đâu? Tốc độ này phục vụ mục đích hay chỉ là quán tính?","Hấp tấp, quá đà, thiếu kế hoạch"],
+  ["Queen","nội lực","Mày đang nuôi dưỡng phẩm chất nào bên trong?","Làm chủ bên trong — sâu sắc, tự biết mình, nuôi dưỡng. Sức mạnh từ sự hiểu biết bên trong thay vì kiểm soát bên ngoài.","Mày đang nuôi dưỡng phần nào của bản thân? Điều gì cần sự chăm sóc nội tâm thay vì hành động vội?","Kiểm soát quá mức, thiếu ranh giới"],
+  ["King","làm chủ","Chỗ nào cần bản lĩnh trưởng thành hơn?","Làm chủ ra ngoài — dẫn dắt, quyết định dứt khoát, chịu trách nhiệm. Sức mạnh được biểu hiện ra thế giới.","Mày đang dẫn dắt hay đang kiểm soát? Điều gì cần sự quyết đoán trưởng thành?","Độc đoán, lạnh lùng, mất kết nối cảm xúc"]
+];
+
+function minorMeaning(rank, suit) {
+  const base = {
+    Cups:"Cảm xúc, tình cảm, lòng trắc ẩn và mối liên hệ với người khác.",
+    Swords:"Tư duy, lời nói, sự thật, áp lực tinh thần và quyết định khó.",
+    Wands:"Lửa hành động, ý tưởng, tham vọng, sáng tạo và động lực.",
+    Pentacles:"Vật chất, tiền bạc, công việc, sức khỏe, thân thể và nền tảng sống."
+  }[suit];
+  const r = ranks.find(r => r[0] === rank);
+  return `${base} ${r[0]} nhấn vào bài học: ${r[1]}.`;
+}
+
+function minorDeep(rank, suit) {
+  const r = ranks.find(r => r[0] === rank);
+  const suitDeep = {
+    Cups:"Trong bối cảnh tình cảm và cảm xúc,",
+    Swords:"Trong bối cảnh tư duy và sự thật,",
+    Wands:"Trong bối cảnh hành động và đam mê,",
+    Pentacles:"Trong bối cảnh vật chất và công việc,"
+  }[suit];
+  return `${suitDeep} ${r[3]}`;
+}
+
+const deck = [
+  ...major.map(x => ({ num:x[0], name:x[1], suit:x[2], symbol:x[3], keywords:x[4], question:x[5], meaning:x[6], deepMeaning:x[7], deepQuestion:x[8], shadow:x[9] })),
+  ...Object.keys(suits).flatMap(suit => ranks.map(([rank,key,q,deep,dq,shadow]) => ({
+    num: String(ranks.indexOf(ranks.find(r=>r[0]===rank))+1),
+    name:`${rank} of ${suit}`, suit, symbol:suits[suit][0],
+    keywords:[key,...suits[suit][1].split(", ").slice(0,2)],
+    question:q, meaning:minorMeaning(rank,suit),
+    deepMeaning:minorDeep(rank,suit), deepQuestion:dq, shadow
+  })))
+];
+
+/* ═══ CHI TIẾT 5 KHÍA CẠNH ═══
+   Key = tên lá chính xác. Mỗi lá có: tinhThan, tinhYeu, suNghiep, sucKhoe, thongDiep, laNguoc */
+const cardAspects = {
+  "The Fool":{"tinhThan":"Đây là thời điểm khởi đầu mới mẻ về mặt tinh thần. Mày đang ở ngưỡng cửa của một hành trình — có thể chưa rõ đích đến, nhưng năng lượng bên trong đang thôi thúc bước tới. Đừng sợ sự ngây thơ, đây là sức mạnh chứ không phải điểm yếu.","tinhYeu":"Trong tình yêu, The Fool báo hiệu một mối quan hệ mới đầy hứng khởi, hoặc một cơ hội tình cảm bất ngờ. Nếu đang độc thân, hãy cởi mở — tình yêu đến từ nơi ít ngờ nhất. Nếu đang yêu, đây là thời điểm thêm sự vui tươi và phiêu lưu vào mối quan hệ.","suNghiep":"Cơ hội nghề nghiệp mới đang mở ra — có thể là dự án khởi nghiệp, chuyển ngành, hoặc bắt đầu từ đầu. Đừng bị tê liệt bởi việc chưa có đủ kinh nghiệm. Thế giới thưởng cho người dám bước, không phải người chuẩn bị mãi.","sucKhoe":"Năng lượng dồi dào và tinh thần tươi mới. Đây là thời điểm tốt để bắt đầu thói quen sức khỏe mới — tập thể dục, ăn uống khác đi, hoặc thử phương pháp chăm sóc bản thân mới. Cơ thể đang sẵn sàng thay đổi.","thongDiep":"Hãy dám bắt đầu. Không cần đủ điều kiện, không cần bản đồ hoàn chỉnh. Một bước nhỏ hôm nay quan trọng hơn mọi kế hoạch hoàn hảo không bao giờ được thực hiện.","laNguoc":"Khi ngược, The Fool cảnh báo về sự liều lĩnh thiếu suy nghĩ, bỏ qua bài học từ quá khứ, hoặc đang sợ hãi một khởi đầu cần thiết. Hỏi: mày đang hấp tấp hay đang trốn tránh?"},
+
+  "The Magician":{"tinhThan":"Mày đang ở trạng thái có đủ năng lực — tất cả công cụ tinh thần đã sẵn sàng. Ý chí, trực giác, logic và hành động đều đang hoạt động. Đây là lúc tập trung toàn bộ năng lực vào một điểm.","tinhYeu":"Trong tình yêu, The Magician cho thấy mày có khả năng tạo ra mối quan hệ như mày muốn — nhưng phải chủ động. Hãy giao tiếp rõ ràng, bày tỏ ý định thật. Nếu đang tìm kiếm, hãy dùng sức hút tự nhiên của mày thay vì chờ đợi thụ động.","suNghiep":"Đây là thời điểm vàng để thực hiện ý tưởng. Mày có đủ kỹ năng, mạng lưới và nguồn lực — chỉ cần tập trung. Đừng phân tán sang quá nhiều hướng. Một dự án thực hiện trọn vẹn hơn mười dự án bỏ dở.","sucKhoe":"Sức khỏe tốt khi mày chủ động điều phối các thói quen. Hãy nhìn lại: mày đang lãng phí năng lượng ở đâu? Điều chỉnh nhịp sống để các phần — tâm trí, cơ thể, tinh thần — hoạt động đồng bộ.","thongDiep":"Đừng hỏi 'mình có đủ không?' — hãy hỏi 'mình chưa dùng gì trong tay mình?'. Tất cả đã ở đó. Chỉ cần ý chí tập trung.","laNguoc":"Khi ngược: tài năng bị lãng phí, thiếu tập trung, hoặc dùng kỹ năng theo hướng không lành mạnh. Cũng có thể là lừa dối bản thân về năng lực thật sự của mình."},
+
+  "The High Priestess":{"tinhThan":"Đây là thời điểm lắng nghe bên trong hơn là tìm kiếm bên ngoài. Trực giác đang rất mạnh — những giấc mơ, linh cảm, cảm giác 'biết mà không giải thích được' đều đang nói với mày. Hãy tin vào chúng.","tinhYeu":"Có điều gì đó chưa được nói ra trong mối quan hệ. Có thể là cảm xúc ẩn, bí mật chưa chia sẻ, hoặc kỳ vọng chưa được đặt ra rõ ràng. Đừng vội kết luận — quan sát thêm trước khi hành động.","suNghiep":"Không phải lúc nói hay hành động — là lúc quan sát và thu thập thông tin. Có điều gì đó đang xảy ra hậu trường mà mày chưa thấy hết. Tin vào linh cảm về đồng nghiệp hay tình huống đang diễn ra.","sucKhoe":"Lắng nghe tín hiệu của cơ thể. Có thể có vấn đề nhỏ đang bị bỏ qua vì không rõ ràng — hãy chú ý những thay đổi tinh tế về giấc ngủ, năng lượng, hoặc cảm giác chung.","thongDiep":"Im lặng không phải thụ động — đó là sức mạnh. Không phải mọi câu hỏi đều cần trả lời ngay. Hãy ngồi với sự không chắc chắn và cho phép sự thật tự hiện ra.","laNguoc":"Khi ngược: thông tin bị giấu giếm, trực giác bị bỏ qua, hoặc đang chia sẻ bí mật không nên chia sẻ. Cũng có thể là bị cô lập và thiếu kết nối."},
+
+  "The Empress":{"tinhThan":"Thời điểm nuôi dưỡng bản thân — không ép, không tự phán xét. Hãy cho phép mình nghỉ ngơi, sáng tạo, tận hưởng. Sự đủ đầy đến khi mày ngừng vận hành theo chế độ 'thiếu thốn'.","tinhYeu":"Năng lượng tình yêu rất cao — sự nồng ấm, kết nối thể xác và cảm xúc đều đang mở. Nếu đang trong mối quan hệ, đây là thời điểm gắn kết sâu hơn. Nếu độc thân, hãy yêu bản thân trước — đó là sức hút mạnh nhất.","suNghiep":"Sáng tạo đang bùng nổ. Đây là lúc để tạo ra — viết, thiết kế, xây dựng, nấu ăn, bất cứ thứ gì ra đời từ tay mày. Dự án nghệ thuật hoặc nuôi dưỡng người khác (mentor, dạy học) đặc biệt thuận lợi.","sucKhoe":"Hãy yêu thương cơ thể thay vì kiểm soát nó. Dinh dưỡng, nghỉ ngơi, thiên nhiên, tắm nắng, xúc giác — đây là những gì cơ thể đang cần. Đừng bỏ qua nhu cầu thể xác cơ bản.","thongDiep":"Mày không cần kiếm quyền được nghỉ ngơi hay tận hưởng. Sự phong phú là trạng thái tự nhiên khi mày không tự chặn nó bằng tâm lý thiếu hụt.","laNguoc":"Khi ngược: phụ thuộc thái quá, thiếu ranh giới, tự bỏ bê bản thân hoặc kiểm soát người khác dưới danh nghĩa 'quan tâm'. Hỏi: mày đang cho đi từ đủ đầy hay từ sợ hãi?"},
+
+  "The Emperor":{"tinhThan":"Đây là lúc thiết lập cấu trúc nội tâm — kỷ luật, routine, ranh giới. Tinh thần mạnh khi có nền tảng vững. Đừng để cảm xúc lái tất cả — cần sự ổn định của tư duy để định hướng.","tinhYeu":"Trong tình yêu, cần sự rõ ràng về ranh giới và kỳ vọng. Nếu cảm thấy mất kiểm soát trong quan hệ, hãy thiết lập lại sự tự tôn và ranh giới lành mạnh. Đối tác cần ai đó vững chắc, không phải ai đó kiểm soát.","suNghiep":"Thời điểm dẫn dắt, lập kế hoạch, và xây dựng hệ thống. Đừng để dự án chạy theo cảm hứng — cần cấu trúc rõ ràng. Nếu đang lãnh đạo nhóm, hãy đảm bảo mọi người biết vai trò của mình.","sucKhoe":"Kỷ luật là chìa khóa. Xây dựng thói quen cứng nhắc — giờ ngủ, giờ tập, giờ ăn. Cơ thể phản ứng tốt với cấu trúc nhất quán hơn là những cố gắng bộc phát không đều đặn.","thongDiep":"Tự do thật sự đến từ kỷ luật, không phải từ không có giới hạn. Xây nền móng vững trước khi xây cao.","laNguoc":"Khi ngược: độc đoán, kiểm soát người khác bằng sợ hãi, hoặc ngược lại — hoàn toàn thiếu cấu trúc và kỷ luật. Cũng có thể là đang bị ai đó kiểm soát quá mức."},
+
+  "The Hierophant":{"tinhThan":"Đây là lúc kết nối với một hệ thống niềm tin hoặc tìm kiếm người hướng dẫn. Học hỏi từ truyền thống hoặc thầy có thể mang lại nền tảng mà mày đang thiếu. Nhưng cũng hỏi: hệ thống đó có thật sự phù hợp với mày không?","tinhYeu":"Mối quan hệ đang hoặc cần được xã hội công nhận — có thể là bước lên một tầng mới (cam kết, hôn nhân). Cũng có thể là áp lực từ gia đình hay xã hội về chuyện tình cảm đang ảnh hưởng đến quyết định.","suNghiep":"Học hỏi từ người có kinh nghiệm, mentor, hoặc đào tạo chính thống sẽ rất có giá trị lúc này. Tuân thủ quy trình và hệ thống của tổ chức — đây không phải lúc phá vỡ quy tắc.","sucKhoe":"Tìm kiếm sự hướng dẫn y tế chính thống thay vì tự xử lý. Tham khảo chuyên gia, đừng chỉ đọc internet. Các liệu pháp có hệ thống (y học, thiền định có truyền thống) đang phù hợp.","thongDiep":"Không phải lúc nào cũng cần phá vỡ hệ thống. Đôi khi học từ người đi trước là con đường ngắn nhất. Nhưng học xong, hãy tự hỏi: cái gì thật sự là của mày?","laNguoc":"Khi ngược: giáo điều, bảo thủ, hoặc ngược lại — nổi loạn không có lý do, từ chối mọi sự hướng dẫn. Cũng có thể là đang bị lợi dụng dưới danh nghĩa 'truyền thống'."},
+
+  "The Lovers":{"tinhThan":"Đây là thời điểm lựa chọn sống đúng với giá trị thật của mày — không phải giá trị xã hội áp đặt. Sự hài hòa nội tâm đến khi những gì mày làm, những gì mày tin, và những gì mày cảm thấy đều nhất quán với nhau.","tinhYeu":"Lá tình yêu mạnh nhất. Kết nối sâu sắc, sự hòa hợp thật sự — không chỉ hấp dẫn bề mặt. Nếu đang đứng trước lựa chọn giữa hai người hoặc hai hướng tình cảm, hãy hỏi: cái nào phù hợp với giá trị thật của mày?","suNghiep":"Có sự lựa chọn lớn đang đến — có thể là hai cơ hội, hai hướng đi, hay quyết định có gắn bó dài hạn với một dự án hay không. Chọn dựa trên giá trị thật, không phải dựa trên sợ bỏ lỡ.","sucKhoe":"Sự hài hòa giữa các phần của cuộc sống ảnh hưởng trực tiếp đến sức khỏe. Nếu đang có mâu thuẫn nội tâm — làm việc mình không thích, sống không đúng với mình — cơ thể sẽ phản ứng.","thongDiep":"Tình yêu thật không cần hy sinh bản thân. Sự lựa chọn đúng đắn là khi cả hai bên đều được trở thành phiên bản tốt hơn của mình.","laNguoc":"Khi ngược: mối quan hệ độc hại, lựa chọn sai giá trị, hoặc đang né tránh một quyết định cần thiết. Hỏi: mày đang ở lại vì yêu hay vì sợ?"},
+
+  "The Chariot":{"tinhThan":"Ý chí và quyết tâm đang mạnh. Đây là thời điểm tiến lên — nhưng cần định hướng rõ ràng. Tinh thần chiến binh không phải về giao tranh với người khác, mà về điều phối các lực bên trong bản thân.","tinhYeu":"Có thể đang bỏ nhiều năng lượng vào công việc và mục tiêu cá nhân đến mức tình yêu bị xếp hàng sau. Cần cân bằng giữa tham vọng cá nhân và đầu tư vào quan hệ. Đừng để chiến thắng trong công việc mà thất bại ở nhà.","suNghiep":"Đây là lúc tiến lên, vượt qua trở ngại, giành lấy mục tiêu. Năng lượng và sự tập trung đang ở mức cao. Hãy tận dụng động lực này nhưng giữ hướng đi rõ ràng — đừng để tốc độ che khuất mục tiêu thật.","sucKhoe":"Cẩn thận kiệt sức do đẩy bản thân quá mức. Năng lượng cao không có nghĩa là vô tận. Cần nghỉ ngơi chiến lược để duy trì hiệu suất về lâu dài.","thongDiep":"Chiến thắng không phải về việc đè bẹp đối thủ — mà về việc điều phối các lực đối nghịch trong bản thân để đi đúng hướng. Sức mạnh thật là kiểm soát bản thân.","laNguoc":"Khi ngược: mất kiểm soát, hành động hung hăng, hoặc bị các lực bên trong kéo đi theo nhiều hướng khác nhau mà không biết chọn cái nào."},
+
+  "Strength":{"tinhThan":"Sức mạnh thật không đến từ việc triệt tiêu cảm xúc hay bản năng — mà từ việc thuần hóa chúng bằng sự hiểu biết và tình yêu thương. Đây là lúc nhìn vào những phần 'tối' hay 'yếu' của bản thân với lòng trắc ẩn thay vì phán xét.","tinhYeu":"Mối quan hệ đòi hỏi sự kiên nhẫn và dịu dàng — không phải kiểm soát. Nếu đang có xung đột, hãy thử tiếp cận bằng sự hiểu biết thay vì tranh luận. Tình yêu thật mạnh hơn bất kỳ sự thống trị nào.","suNghiep":"Thời điểm cần sự bền bỉ hơn là tốc độ. Những thách thức đang đến không phải để nghiền nát mày — để rèn luyện mày. Tiếp cận đồng nghiệp hay đối tác khó khăn bằng sự kiên nhẫn.","sucKhoe":"Lắng nghe cơ thể với lòng trắc ẩn thay vì phán xét. Nếu đang đấu tranh với thói quen xấu hay cảm xúc tiêu cực, hãy tiếp cận chúng như người bạn cần được hiểu, không phải kẻ thù cần bị tiêu diệt.","thongDiep":"Sức mạnh lớn nhất là không cần chứng minh mình mạnh. Người thật sự tự tin không cần làm ai sợ.","laNguoc":"Khi ngược: thiếu tự tin, để cảm xúc và bản năng kiểm soát, hoặc dùng sức mạnh thô để ép người khác theo ý mình."},
+
+  "The Hermit":{"tinhThan":"Đây là thời điểm rút lui khỏi ồn ào bên ngoài để tìm câu trả lời bên trong. Không phải cô đơn vì bị bỏ lại — mà là cô độc có chủ đích để hiểu rõ bản thân. Ánh sáng mày đang tìm đã ở trong tay.","tinhYeu":"Có thể cần thời gian một mình để hiểu rõ mình thật sự muốn gì trong tình yêu. Đừng vội vào mối quan hệ mới chỉ để tránh sự cô đơn. Sự tự biết mình là cơ sở của mọi mối quan hệ lành mạnh.","suNghiep":"Đây không phải lúc mạng lưới hay hợp tác ầm ĩ — là lúc đi sâu vào chuyên môn, nghiên cứu, và phát triển kỹ năng trong im lặng. Làm việc một mình hoặc nghiên cứu độc lập sẽ cho kết quả tốt hơn.","sucKhoe":"Cần thời gian và không gian yên tĩnh để cơ thể phục hồi. Giảm kích thích — mạng xã hội, tiếng ồn, tụ tập — cho phép hệ thần kinh nghỉ ngơi thật sự.","thongDiep":"Câu trả lời cho những câu hỏi lớn nhất của mày không nằm ở ngoài kia. Chúng đang chờ trong sự im lặng bên trong.","laNguoc":"Khi ngược: cô lập vì sợ hãi thay vì chọn lựa có ý thức, từ chối kết nối khi thật ra cần nó, hoặc bị mắc kẹt trong bóng tối của mình mà không có ánh đèn dẫn đường."},
+
+  "Wheel of Fortune":{"tinhThan":"Mọi thứ đang thay đổi — và điều đó không xấu. Người đứng ở trung tâm bánh xe không bị xoay. Thực hành sự bình thản trước biến động là bài tập tinh thần quan trọng nhất lúc này.","tinhYeu":"Một sự thay đổi lớn đang đến trong lĩnh vực tình cảm — có thể là cơ hội gặp ai đó, hoặc một bước ngoặt trong mối quan hệ hiện tại. Hãy sẵn sàng thích nghi thay vì cố giữ mọi thứ như cũ.","suNghiep":"Thời cơ đang đến — nhưng nó sẽ đến và đi nhanh. Cần nhận ra và nắm lấy ngay. Đây cũng là thời điểm nhìn lại chu kỳ: những gì đã đến đỉnh và cần giảm xuống? Những gì đang lên và cần đầu tư?","sucKhoe":"Sức khỏe đang trong giai đoạn chuyển tiếp. Có thể cảm thấy không ổn định — đây là bình thường trong giai đoạn thay đổi. Hãy chú ý các tín hiệu cơ thể và thích nghi, không cố chống lại thay đổi tự nhiên.","thongDiep":"Không ai mãi ở đỉnh, không ai mãi ở đáy. Câu hỏi không phải 'số phận đang đi đâu?' mà 'mày đang ứng phó như thế nào?'","laNguoc":"Khi ngược: kháng cự thay đổi không thể tránh khỏi, cảm giác vận rủi, hoặc bị bất ngờ bởi sự xoay chuyển vì không chịu nhìn thấy tín hiệu đang đến."},
+
+  "Justice":{"tinhThan":"Đây là thời điểm nhìn thẳng vào sự thật — về bản thân, về tình huống, về trách nhiệm của mày. Không tự phán xét khắc nghiệt, nhưng cũng không né tránh. Sự thật, dù khó, sẽ giải phóng.","tinhYeu":"Cân bằng trong mối quan hệ đang được kiểm tra. Ai đang cho nhiều hơn nhận? Ai đang né tránh trách nhiệm? Đây là thời điểm để những cuộc trò chuyện khó cần phải xảy ra, xảy ra.","suNghiep":"Mọi quyết định và hành động trong quá khứ đang đến hồi kết quả. Nếu đã làm tốt — sẽ được công nhận. Nếu có sai sót — cần đối mặt và sửa chữa. Tính trung thực và minh bạch là vũ khí mạnh nhất lúc này.","sucKhoe":"Cơ thể đang phản ánh sự mất cân bằng trong cuộc sống. Nhìn lại lối sống một cách khách quan: đâu là thứ mày biết là không tốt nhưng vẫn tiếp tục? Hệ quả đang đến gần.","thongDiep":"Không ai thoát khỏi hệ quả của hành động mình. Nhưng điều tốt là: sự trung thực và trách nhiệm ngay bây giờ có thể thay đổi hướng đi.","laNguoc":"Khi ngược: bất công, né tránh trách nhiệm, hoặc đang tự phán xét bản thân quá khắc nghiệt đến mức tê liệt. Hỏi: mày đang sợ sự thật nào?"},
+
+  "The Hanged Man":{"tinhThan":"Giai đoạn bắt buộc phải dừng lại — dù mày muốn hay không. Thay vì kháng cự, hãy dùng thời gian này để nhìn mọi thứ từ góc hoàn toàn khác. Sự treo lơ lửng này có mục đích.","tinhYeu":"Trong tình yêu, đây không phải lúc hành động vội vàng. Hãy dừng lại và quan sát mối quan hệ từ bên ngoài. Điều gì mày chưa thấy vì quá gần? Đôi khi buông kiểm soát là cách duy nhất để mọi thứ tự nhiên ổn định.","suNghiep":"Một dự án hoặc kế hoạch đang bị treo — và điều đó không nhất thiết là xấu. Đây có thể là thời điểm tốt để thu thập thêm thông tin, đổi góc tiếp cận, hoặc để thị trường/người khác có thời gian bắt kịp tầm nhìn của mày.","sucKhoe":"Cơ thể cần nghỉ ngơi thật sự — không phải nghỉ kiểu vẫn lo lắng. Các liệu pháp giảm căng thẳng như thiền, yoga, hay đơn giản là nằm im không làm gì đang rất cần thiết.","thongDiep":"Đôi khi không làm gì là làm điều thông minh nhất. Hãy buông kiểm soát và xem điều gì tự nhiên xuất hiện khi mày không còn cố.","laNguoc":"Khi ngược: trì hoãn do sợ hãi (không phải sự dừng lại có ý thức), hy sinh bản thân không cần thiết, hoặc mắc kẹt trong trạng thái chờ đợi mà không có hành động gì cả."},
+
+  "Death":{"tinhThan":"Đây là lá chuyển hóa quan trọng nhất — không phải về cái chết thật mà về sự kết thúc cần thiết. Phiên bản cũ của mày đang chết đi để phiên bản mới ra đời. Hãy để nó xảy ra.","tinhYeu":"Một giai đoạn trong mối quan hệ đang kết thúc — có thể là mối quan hệ hoàn toàn, hoặc một mô thức cũ trong mối quan hệ. Đau là bình thường. Nhưng đây là sự kết thúc cần thiết để thứ tốt hơn có thể bắt đầu.","suNghiep":"Một hướng đi, dự án, hoặc cách làm việc cũ đang đến hồi kết thúc. Đừng bám víu. Giải phóng năng lượng từ thứ đã chết sẽ giải phóng nguồn lực cho thứ mới đang chờ.","sucKhoe":"Cần loại bỏ những thói quen xấu đang 'chết dần' cơ thể. Đây là thời điểm quyết liệt — không phải điều chỉnh nhỏ mà là thay đổi thật sự trong lối sống.","thongDiep":"Con bướm không thể bay nếu không chịu chết trong kén. Thứ mày đang mất đi không phải bị lấy đi — nó đã hoàn thành vai trò của nó. Hãy biết ơn và buông tay.","laNguoc":"Khi ngược: kháng cự sự thay đổi cần thiết, bám víu vào những thứ đã chết, hoặc sợ hãi sự kết thúc đến mức không cho bản thân được tái sinh."},
+
+  "Temperance":{"tinhThan":"Đây là giai đoạn chữa lành và tích hợp. Sau những biến động, mày đang học cách pha trộn các phần đối lập của bản thân — lý trí và cảm xúc, hành động và nghỉ ngơi, cá nhân và cộng đồng — thành một chỉnh thể hài hòa.","tinhYeu":"Trong tình yêu, cần sự kiên nhẫn và điều độ. Không ép buộc, không hấp tấp. Hãy để mối quan hệ phát triển theo nhịp tự nhiên của nó. Nếu có xung đột, tìm điểm trung dung thay vì thắng thua.","suNghiep":"Làm việc với nhịp bền vững thay vì bùng cháy rồi tắt. Đây là lúc tích hợp các kỹ năng và kinh nghiệm khác nhau thành một cách tiếp cận toàn diện. Hợp tác đa chiều sẽ cho kết quả tốt hơn làm một mình.","sucKhoe":"Cần sự cân bằng trong tất cả — ăn uống điều độ, luyện tập vừa phải, nghỉ ngơi đủ. Không cực đoan theo hướng nào. Chữa lành đang xảy ra — hãy hỗ trợ nó bằng lối sống nhất quán.","thongDiep":"Sự hoàn hảo không phải là không có sai sót — mà là biết cách pha trộn mọi phần của mình thành một thứ độc đáo và hài hòa.","laNguoc":"Khi ngược: mất cân bằng cực đoan, thiếu kiên nhẫn, hoặc cố ép hai thứ không tương thích phải hòa hợp theo cách không tự nhiên."},
+
+  "The Devil":{"tinhThan":"Đây là lá về bóng tối — không phải để sợ hãi mà để nhìn thẳng vào. Điều gì đang kiểm soát mày mà mày gọi là 'lựa chọn'? Nhìn rõ ràng buộc là bước đầu tiên để tháo nó.","tinhYeu":"Trong tình yêu, có thể đang ở trong mối quan hệ do thói quen, sợ cô đơn, hoặc cảm giác phụ thuộc — không phải tình yêu thật. Hoặc đang bị thu hút bởi ai đó không lành mạnh cho mày. Hỏi thật: mày đang ở đây vì yêu hay vì sợ?","suNghiep":"Có thể đang mắc kẹt trong công việc vì tiền, vì sợ mất ổn định, hoặc vì áp lực xã hội — dù biết đây không phải điều mình muốn. Hỏi: đây có thật sự là lựa chọn không? Hay mày đang bị xích?","sucKhoe":"Có thói quen hoặc hành vi đang gây hại cho sức khỏe mà mày biết nhưng không ngừng. Nghiện — không nhất thiết là chất kích thích, có thể là nghiện xác nhận, nghiện bận rộn, nghiện drama. Nhìn thẳng vào nó.","thongDiep":"Dây xích trông có vẻ vững chắc nhưng thường là ảo giác. Nhìn thật kỹ: nếu mày muốn ra đi, mày có thể không? Câu trả lời sẽ tiết lộ rất nhiều.","laNguoc":"Khi ngược: đang thoát khỏi ràng buộc, nhìn rõ bản chất thật của một tình huống, hoặc đang đối mặt với shadow của mình một cách dũng cảm."},
+
+  "The Tower":{"tinhThan":"Cú sốc và sự sụp đổ — nhưng chỉ những gì được xây trên nền sai mới đổ. Đây là sự giải phóng đau đớn nhưng cần thiết. Những gì thật sự vững chắc sẽ đứng vững.","tinhYeu":"Một sự kiện bất ngờ đang hoặc sẽ làm rung chuyển mối quan hệ. Có thể là sự thật bị giấu giếm bị lộ, hoặc một cú sốc làm thay đổi mọi thứ. Đau nhưng thật — tốt hơn là tiếp tục sống trong ảo tưởng.","suNghiep":"Kế hoạch hoặc cấu trúc nghề nghiệp đang sụp đổ — đây là dấu hiệu để xây lại trên nền tảng đúng hơn. Đừng cố cứu thứ đã không thể cứu. Hỏi: nền móng nào mày cần xây lại từ đầu?","sucKhoe":"Có thể là một chẩn đoán bất ngờ hoặc tín hiệu mạnh từ cơ thể đang buộc mày phải chú ý. Đừng bỏ qua — đây là cơ hội để thay đổi căn bản, không phải chỉ vá víu.","thongDiep":"Thứ gì đó đang sụp đổ trong đời mày. Hỏi không phải là 'tại sao điều này xảy ra với tao?' mà là 'nền móng sai nào đã dẫn đến điều này?'","laNguoc":"Khi ngược: né tránh sự sụp đổ cần thiết, cố chống đỡ thứ đã không thể cứu, hoặc đang đi qua giai đoạn Tower chậm hơn và ít kịch tính hơn."},
+
+  "The Star":{"tinhThan":"Sau bão là sự bình yên và hy vọng. Đây là giai đoạn chữa lành thật sự — không ép mình hồi phục nhanh, mà để quá trình tự nhiên diễn ra. Tin rằng điều tốt hơn đang đến.","tinhYeu":"Chữa lành sau tổn thương tình cảm. Nếu đã trải qua đau thương trong tình yêu, đây là dấu hiệu trái tim đang hồi phục. Hãy để mình mở cửa lại — không phải vội vàng, mà dần dần, theo nhịp tự nhiên.","suNghiep":"Cảm hứng và định hướng đang trở lại sau giai đoạn khó. Đây là lúc mơ ước lớn hơn và đặt ra mục tiêu dài hạn. Theo đuổi điều thật sự có ý nghĩa với mày, không chỉ điều an toàn.","sucKhoe":"Giai đoạn hồi phục — cơ thể và tinh thần đang lành lại. Hỗ trợ quá trình này bằng cách giữ hy vọng, tránh stress không cần thiết, và tin tưởng vào khả năng tự chữa lành của cơ thể.","thongDiep":"Ngay cả trong đêm tối nhất, những ngôi sao vẫn ở đó. Hy vọng không phải là ngây thơ — đó là sức mạnh để tiếp tục bước.","laNguoc":"Khi ngược: mất niềm tin, tuyệt vọng, hoặc không cho phép bản thân hy vọng sau tổn thương. Hỏi: điều gì đang ngăn mày tin rằng mọi thứ có thể tốt hơn?"},
+
+  "The Moon":{"tinhThan":"Mày đang ở trong giai đoạn mơ hồ và bất định — đây không phải lúc để quyết định lớn. Vô thức đang nói rất to qua giấc mơ, linh cảm, và cảm xúc khó giải thích. Hãy lắng nghe nhưng đừng hành động vội.","tinhYeu":"Có điều gì đó không rõ ràng trong mối quan hệ — có thể là sự không trung thực, ảo tưởng, hay hiểu lầm chưa được giải quyết. Đừng quyết định lớn dựa trên cảm xúc đang nhiễu. Cần thêm thời gian để mọi thứ rõ ràng hơn.","suNghiep":"Thông tin không đầy đủ hoặc có người không trung thực trong môi trường làm việc. Không phải lúc tin tưởng hoàn toàn — quan sát, kiểm chứng thông tin, và đừng để người khác thao túng cảm xúc mày để đưa ra quyết định.","sucKhoe":"Rối loạn giấc ngủ, lo âu, hoặc cảm xúc không ổn định đang ảnh hưởng đến sức khỏe. Đây thường là dấu hiệu của thứ gì đó trong vô thức cần được chú ý. Thiền định, viết nhật ký, hoặc trò chuyện với chuyên gia tâm lý có thể giúp.","thongDiep":"Không phải mọi nỗi sợ đều là thật. Nhưng cũng không phải mọi điều mày thấy đều là ảo giác. Hãy kiên nhẫn chờ ánh sáng soi rõ trước khi hành động.","laNguoc":"Khi ngược: sự rõ ràng đang dần trở lại, hoặc đang đối mặt với nỗi sợ hãi và ảo tưởng một cách dũng cảm. Ánh sáng đang bắt đầu xuyên qua màn sương."},
+
+  "The Sun":{"tinhThan":"Sự rõ ràng, niềm vui, và sức sống đang tràn đầy. Đây là một trong những trạng thái tinh thần tốt nhất — hãy tận dụng để làm những việc quan trọng mày thường trì hoãn. Năng lượng đang hỗ trợ mày.","tinhYeu":"Tình yêu đang ở trạng thái tươi sáng — niềm vui, sự thật thà, và kết nối chân thực. Nếu đang trong mối quan hệ, đây là giai đoạn hạnh phúc thật. Nếu độc thân, sức hút tự nhiên của mày đang ở mức cao nhất.","suNghiep":"Thành công và sự công nhận đang đến. Dự án đang đi đúng hướng, nỗ lực đang được nhìn thấy. Hãy tự tin tiến lên và chia sẻ thành quả của mình — đừng thu nhỏ khi đang được ghi nhận.","sucKhoe":"Sức khỏe đang tốt và năng lượng dồi dào. Đây là lúc tốt để xây dựng thói quen sức khỏe mới vì động lực và ý chí đang hỗ trợ mày. Tận hưởng cảm giác khỏe mạnh này.","thongDiep":"Đây là ngày tốt. Đừng chờ đợi nó — hãy nhận ra nó và sống trọn vẹn trong đó. Niềm vui không cần lý do ngoài việc mày đang sống.","laNguoc":"Khi ngược: niềm vui bề mặt che giấu sự trống rỗng bên trong, kiêu ngạo, hoặc sự thành công đang làm mày mù quáng trước sự thật."},
+
+  "Judgement":{"tinhThan":"Một cuộc thức tỉnh đang xảy ra — mày đang được gọi để sống đúng với phiên bản thật nhất của mình. Không phải ai muốn mày trở thành, mà là người mày thật sự là. Tiếng gọi này đã ở đó từ lâu.","tinhYeu":"Có một đánh giá lại cần xảy ra — về mối quan hệ hiện tại, về những lựa chọn trong quá khứ, về những gì mày thật sự cần trong tình yêu. Không phải để phán xét mà để nhìn rõ và chuyển hóa.","suNghiep":"Đây là lúc đánh giá lại sự nghiệp một cách sâu sắc: mày đang làm gì có thật sự là điều mày được gọi để làm không? Một cơ hội hoặc bước ngoặt lớn đang gõ cửa — hãy sẵn sàng trả lời.","sucKhoe":"Cần nhìn lại toàn bộ lối sống và thói quen một cách trung thực. Không phải điều chỉnh nhỏ — là thức tỉnh về sức khỏe. Thân thể đang gửi thông điệp quan trọng mà mày cần lắng nghe và hành động.","thongDiep":"Tiếng gọi đó mày đã nghe từ lâu — về điều mày cần làm, người mày cần trở thành — đang gọi to hơn bao giờ hết. Đã đến lúc trả lời.","laNguoc":"Khi ngược: bỏ qua tiếng gọi quan trọng, tự phán xét quá khắt khe, hoặc không chịu tha thứ cho bản thân và người khác để tiến về phía trước."},
+
+  "The World":{"tinhThan":"Một chu kỳ lớn đang hoàn tất — mày đã học xong bài học của giai đoạn này. Cảm giác tích hợp và toàn vẹn đang đến. Đây không phải kết thúc — mà là sự chuẩn bị cho một vòng mới ở tầng cao hơn.","tinhYeu":"Mối quan hệ đang ở một cột mốc quan trọng — có thể là cam kết, kết hôn, hay sự công nhận đây là người mày muốn cùng bước tiếp. Sự hài hòa và đủ đầy trong tình yêu đang hiện diện.","suNghiep":"Thành tựu và sự hoàn tất — một dự án lớn kết thúc thành công, hoặc mày đang ở đỉnh của một chu kỳ nghề nghiệp. Hãy ăn mừng và công nhận thành quả trước khi bắt đầu hành trình tiếp theo.","sucKhoe":"Cơ thể và tinh thần đang ở trạng thái hài hòa. Đây là kết quả của sự tích hợp — khi tất cả các phần của cuộc sống đang hoạt động đồng bộ. Hãy duy trì sự cân bằng này.","thongDiep":"Mày đã đi xa hơn mày nghĩ. Hãy dừng lại và nhìn lại con đường đã đi — không phải để tự mãn, mà để biết ơn và tích lũy sức mạnh cho hành trình tiếp theo.","laNguoc":"Khi ngược: không chịu hoàn tất, trì hoãn kết thúc chu kỳ, hoặc thiếu sự tích hợp — đang sống với các phần rời rạc chưa được kết nối lại."}
+};
+
+/* Tạo aspects cho 56 lá Minor dựa trên suit + rank */
+function buildMinorAspects(rank, suit) {
+  const suitThemes = {
+    Cups:      { domain:"cảm xúc và mối quan hệ", element:"Nước", love:"đặc biệt nhấn mạnh về mặt tình cảm", career:"tập trung vào mối quan hệ trong công việc và sự hài lòng ý nghĩa", health:"liên quan đến sức khỏe tâm thần và cảm xúc", spiritual:"liên quan đến đời sống nội tâm, trực giác và kết nối cảm xúc" },
+    Swords:    { domain:"tư duy và sự thật", element:"Khí", love:"cho thấy cần giao tiếp thẳng thắn và đối mặt với sự thật", career:"đòi hỏi sự rõ ràng, quyết đoán và tư duy sắc bén", health:"thường liên quan đến sức khỏe thần kinh, lo âu và stress từ suy nghĩ", spiritual:"kêu gọi nhìn thẳng vào sự thật nội tâm không né tránh" },
+    Wands:     { domain:"hành động và đam mê", element:"Lửa", love:"mang năng lượng nhiệt huyết và tự nhiên vào tình yêu", career:"thúc đẩy hành động, sáng tạo và sự tiến lên mạnh mẽ", health:"liên quan đến mức năng lượng, sinh lực và động lực vận động", spiritual:"khuyến khích đi theo đam mê và ý chí sâu nhất" },
+    Pentacles: { domain:"vật chất và nền tảng", element:"Đất", love:"nhấn mạnh sự ổn định, đáng tin cậy và nền tảng trong quan hệ", career:"tập trung vào tài chính, kết quả thực tế và sự bền vững", health:"liên quan trực tiếp đến thể chất, dinh dưỡng và lối sống", spiritual:"nhắc nhở rằng sự chăm sóc thân thể là thực hành tâm linh" }
+  };
+  const rankThemes = {
+    "Ace":     { core:"mầm mới và khởi đầu thuần khiết", growth:"Tiềm năng đang mở ra — cần nắm lấy và nuôi dưỡng", challenge:"Rủi ro bỏ qua cơ hội vì chưa sẵn sàng", action:"Bước đầu tiên dù nhỏ để khai thông năng lượng mới" },
+    "Two":     { core:"cân bằng và lựa chọn", growth:"Cần quyết định hoặc duy trì cân bằng giữa hai thứ", challenge:"Mắc kẹt giữa hai lựa chọn mà không dám chọn", action:"Nhìn rõ hai phía và đưa ra quyết định có ý thức" },
+    "Three":   { core:"phát triển và cộng tác", growth:"Năng lượng đang mở rộng — cần người khác để phát triển hơn nữa", challenge:"Cô lập hoặc tự làm tất cả một mình khi có thể hợp tác", action:"Tìm kiếm cộng tác hoặc chia sẻ thành quả với người khác" },
+    "Four":    { core:"ổn định và thủ giữ", growth:"Nền tảng đang vững — nhưng cần hỏi đây là nghỉ ngơi hay trì trệ", challenge:"Bảo thủ, bám víu vào sự an toàn khi cần tiến lên", action:"Đánh giá xem sự ổn định hiện tại đang nuôi dưỡng hay kìm hãm tăng trưởng" },
+    "Five":    { core:"xung đột và khủng hoảng", growth:"Giai đoạn khó nhưng cần thiết — đang học bài học quan trọng", challenge:"Mắc kẹt trong đau khổ mà không thấy lối ra đang có ở đó", action:"Tìm người hoặc nguồn lực đang chờ giúp đỡ mà mày chưa nhận ra" },
+    "Six":     { core:"dịch chuyển và hào phóng", growth:"Giai đoạn chuyển tiếp — đang rời xa thứ cũ và tiến về thứ mới", challenge:"Cho đi hay nhận lấy quá nhiều mà không cân bằng", action:"Nhận ra mày đang ở vai trò người cho hay người nhận và hành động cho phù hợp" },
+    "Seven":   { core:"chiến lược và thử thách", growth:"Cần tư duy thông minh hơn là cố gắng thô", challenge:"Đang chọn cách thiếu trung thực hoặc chiến lược mà mình chưa cam kết thực sự", action:"Xem lại chiến lược hiện tại và hỏi có cách tiếp cận thông minh hơn không" },
+    "Eight":   { core:"kỹ năng và tiến trình đều đặn", growth:"Thành thạo đến từ sự lặp lại kiên nhẫn", challenge:"Bị kẹt trong routine cứng nhắc hoặc bỏ cuộc trước khi đạt thành thạo", action:"Cam kết với một kỹ năng hoặc quy trình và thực hành đều đặn mỗi ngày" },
+    "Nine":    { core:"gần hoàn tất và tự chủ", growth:"Đã đi rất xa — cần công nhận thành quả và hoàn tất hành trình", challenge:"Tự sabotage ngay trước đích, hoặc cô lập dù đã gần thành công", action:"Nhìn lại con đường đã đi và cho phép bản thân tự hào về những gì đã đạt được" },
+    "Ten":     { core:"đỉnh điểm và hoàn tất chu kỳ", growth:"Chu kỳ này đã hoàn thành — dù là viên mãn hay quá tải", challenge:"Không chịu buông khi chu kỳ đã xong, giữ quá nhiều trách nhiệm một mình", action:"Nhìn nhận điều gì đã hoàn tất và chuẩn bị tinh thần cho chu kỳ mới" },
+    "Page":    { core:"học trò và thông điệp mới", growth:"Năng lượng tươi mới, tò mò — thế giới đang mở ra", challenge:"Thiếu cam kết, nhảy từ thứ này sang thứ kia mà không đi sâu vào đâu", action:"Chọn một lĩnh vực để học nghiêm túc thay vì thử nhiều thứ một cách hời hợt" },
+    "Knight":  { core:"hành động mạnh mẽ và sự tiến lên", growth:"Năng lượng ở mức cao nhất — cần định hướng rõ để dùng hiệu quả", challenge:"Hấp tấp, quá đà, hành động mà không suy nghĩ đủ hậu quả", action:"Kiểm tra xem năng lượng đang được dùng để tiến về đúng mục tiêu hay chỉ là quán tính" },
+    "Queen":   { core:"làm chủ nội tâm và nuôi dưỡng", growth:"Sức mạnh từ bên trong — sâu sắc, tự biết mình, dịu dàng mà vững chắc", challenge:"Kiểm soát quá mức hoặc thiếu ranh giới trong việc chăm sóc người khác", action:"Nuôi dưỡng bản thân với cùng mức chú tâm mày dành cho người mày yêu thương" },
+    "King":    { core:"làm chủ ra ngoài và lãnh đạo", growth:"Sức mạnh được biểu hiện ra thế giới — dẫn dắt bằng uy tín, không bằng sợ hãi", challenge:"Xa cách, lạnh lùng, hoặc độc đoán khi quản lý người khác", action:"Hỏi: mày đang lãnh đạo với sự dịu dàng lẫn sự vững chắc chưa?" }
+  };
+  const st = suitThemes[suit];
+  const rt = rankThemes[rank];
+  return {
+    tinhThan: `${rank} of ${suit} trong lĩnh vực ${st.domain} mang năng lượng của ${rt.core}. ${st.spiritual}. ${rt.growth}.`,
+    tinhYeu: `Trong tình yêu, lá này ${st.love}. Với năng lượng ${rt.core}, đây là lúc hỏi: ${rt.challenge.toLowerCase()}.`,
+    suNghiep: `Trong sự nghiệp, ${st.career}. ${rt.core} đang ảnh hưởng đến cách mày làm việc — ${rt.action}.`,
+    sucKhoe: `Về sức khỏe, lá này ${st.health}. Hãy chú ý đến tín hiệu từ cơ thể liên quan đến ${st.domain} — đặc biệt khi năng lượng ${rt.core} đang hiện diện.`,
+    thongDiep: `Thông điệp cốt lõi của ${rank} of ${suit}: ${rt.action}. Đừng bỏ qua chiều sâu của ${st.element} trong giai đoạn này.`,
+    laNguoc: `Khi ngược: ${rt.challenge}. Hỏi thật — mày đang né tránh năng lượng này hay đang sử dụng nó không lành mạnh?`
+  };
+}
+
+/* Gán aspects cho toàn bộ deck */
+deck.forEach(card => {
+  if (card.suit === "Major Arcana") {
+    card.aspects = cardAspects[card.name] || null;
+  } else {
+    const rankName = card.name.split(" of ")[0];
+    card.aspects = buildMinorAspects(rankName, card.suit);
+  }
+});
+
+let state = loadState();
+let currentCard = null;
+
+function loadState(){
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {entries:[]}; }
+  catch { return {entries:[]}; }
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); updateAll(); }
+
+function toast(msg){
+  const el=document.getElementById("toast");
+  el.textContent=msg; el.classList.add("show");
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>el.classList.remove("show"),2200);
+}
+
+function normalizeCardName(str){
+  return String(str||"").toLowerCase()
+    .replace(/ten/g,"10").replace(/nine/g,"9").replace(/eight/g,"8")
+    .replace(/seven/g,"7").replace(/six/g,"6").replace(/five/g,"5")
+    .replace(/four/g,"4").replace(/three/g,"3").replace(/two/g,"2").replace(/one/g,"ace")
+    .replace(/[^a-z0-9]+/g," ").trim();
+}
+function findCardByName(rawName){
+  const q=normalizeCardName(rawName);
+  if(!q)return null;
+  return deck.find(c=>normalizeCardName(c.name)===q)
+    ||deck.find(c=>normalizeCardName(c.name).includes(q))
+    ||deck.find(c=>q.includes(normalizeCardName(c.name)));
+}
+
+function loadTypedCard(){
+  const input=document.getElementById("cardNameInput").value;
+  const picker=document.getElementById("cardPicker").value;
+  const card=findCardByName(input||picker);
+  if(!card){toast("Chưa nhận ra lá này. Thử: The Fool, Death, Ace of Cups, 10 of Swords...");return;}
+  currentCard=card;
+  document.getElementById("cardNameInput").value=card.name;
+  document.getElementById("cardPicker").value=card.name;
+  renderCard(card);
+  document.getElementById("meaningPanel").style.display="block";
+  document.getElementById("journalPanel").style.display="block";
+  document.getElementById("firstFeeling").value="";
+  document.getElementById("selfMirror").value="";
+  document.getElementById("tinyAction").value="";
+  toast("Đã soi: "+card.name);
+}
+
+function renderCard(card){
+  const visual=document.getElementById("visualCard");
+  visual.classList.remove("empty");
+  visual.style.transform="rotate("+(Math.random()*2-1).toFixed(2)+"deg)";
+  visual.innerHTML=`<div class="card-num">${card.num} · ${card.suit}</div><div class="card-symbol">${card.symbol}</div><div class="card-name">${card.name}</div>`;
+  document.getElementById("cardTitle").textContent=card.name;
+  document.getElementById("cardSuit").textContent=card.suit;
+  document.getElementById("keywords").innerHTML=card.keywords.map(k=>`<span class="tag">${k}</span>`).join("");
+  document.getElementById("reflectionQuestion").textContent=card.question;
+  document.getElementById("meaningText").textContent=card.meaning;
+
+  /* Render 5 aspects accordion */
+  const a = card.aspects;
+  const acc = document.getElementById("aspectsAccordion");
+  if (!a) { acc.innerHTML = ""; return; }
+  const aspects = [
+    { icon:"🧠", label:"TINH THẦN", key:"tinhThan" },
+    { icon:"♡",  label:"TÌNH YÊU & QUAN HỆ", key:"tinhYeu" },
+    { icon:"⚡", label:"SỰ NGHIỆP & TÀI CHÍNH", key:"suNghiep" },
+    { icon:"◈",  label:"SỨC KHỎE", key:"sucKhoe" },
+    { icon:"✦",  label:"THÔNG ĐIỆP", key:"thongDiep" }
+  ];
+  acc.innerHTML = aspects.map((asp,i) =>
+    `<details class="aspect-block" ${i===0?"open":""}>
+      <summary><span class="aspect-icon">${asp.icon}</span>${asp.label}</summary>
+      <div class="aspect-body"><p>${a[asp.key]}</p></div>
+    </details>`
+  ).join("") +
+  `<div class="reversed-block">
+    <div class="rev-label">↓ LÁ NGƯỢC</div>
+    <p>${a.laNguoc}</p>
+  </div>`;
+}
+
+function clearDraw(){
+  currentCard=null;
+  document.getElementById("cardNameInput").value="";
+  document.getElementById("cardPicker").value="";
+  const v=document.getElementById("visualCard");
+  v.classList.add("empty"); v.style.transform="";
+  v.innerHTML=`<div class="card-num">ARCANA</div><div class="card-symbol">✦</div><div class="card-name">Chưa rút lá</div>`;
+  document.getElementById("meaningPanel").style.display="none";
+  document.getElementById("journalPanel").style.display="none";
+}
+
+function saveEntry(){
+  if(!currentCard)return toast("Nhập hoặc chọn lá bài trước đã.");
+  const entry={
+    id:crypto.randomUUID?crypto.randomUUID():String(Date.now()),
+    createdAt:new Date().toISOString(), card:currentCard,
+    firstFeeling:document.getElementById("firstFeeling").value.trim(),
+    selfMirror:document.getElementById("selfMirror").value.trim(),
+    tinyAction:document.getElementById("tinyAction").value.trim()
+  };
+  state.entries.unshift(entry); saveState();
+  toast("Đã lưu nhật ký."); switchTab("journal");
+}
+
+function escapeHtml(str){
+  return str.replace(/[&<>'"]/g,c=({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+}
+
+function renderEntries(){
+  const q=document.getElementById("searchInput").value.toLowerCase().trim();
+  const suit=document.getElementById("filterSuit").value;
+  let entries=state.entries.filter(e=>!suit||e.card.suit===suit);
+  if(q)entries=entries.filter(e=>JSON.stringify(e).toLowerCase().includes(q));
+  document.getElementById("entryCount").textContent=`${state.entries.length} MỤC`;
+  const list=document.getElementById("entryList");
+  if(!entries.length){list.innerHTML=`<div class="empty-state">Chưa có nhật ký phù hợp.<br>Rút một lá rồi lưu lại cảm nhận đầu tiên.</div>`;return;}
+  list.innerHTML=entries.map(e=>{
+    const date=new Date(e.createdAt).toLocaleDateString("vi-VN",{day:"2-digit",month:"2-digit",year:"numeric"});
+    return `<article class="entry">
+      <div class="entry-head"><h4>${e.card.symbol} ${e.card.name}</h4><div class="entry-date">${date}</div></div>
+      <div class="keywords">${e.card.keywords.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
+      ${e.firstFeeling?`<p><b style="color:var(--gold)">Cảm giác:</b> ${escapeHtml(e.firstFeeling)}</p>`:""}
+      ${e.selfMirror?`<p><b style="color:var(--gold)">Phản chiếu:</b> ${escapeHtml(e.selfMirror)}</p>`:""}
+      ${e.tinyAction?`<p><b style="color:var(--gold)">Hành động:</b> ${escapeHtml(e.tinyAction)}</p>`:""}
+      <div class="btn-row"><button class="btn secondary" onclick="reuseEntry('${e.id}')">Xem lại lá</button><button class="btn danger" onclick="deleteEntry('${e.id}')">Xóa</button></div>
+    </article>`;
+  }).join("");
+}
+
+window.deleteEntry=function(id){
+  if(!confirm("Xóa mục này?"))return;
+  state.entries=state.entries.filter(e=>e.id!==id);
+  saveState(); toast("Đã xóa.");
+};
+window.reuseEntry=function(id){
+  const entry=state.entries.find(e=>e.id===id);
+  if(!entry)return;
+  currentCard=entry.card; renderCard(currentCard);
+  document.getElementById("meaningPanel").style.display="block";
+  document.getElementById("journalPanel").style.display="block";
+  switchTab("draw");
+};
+
+function updatePatterns(){
+  const entries=state.entries;
+  document.getElementById("totalStat").textContent=entries.length;
+  document.getElementById("majorStat").textContent=entries.filter(e=>e.card.suit==="Major Arcana").length;
+  document.getElementById("streakStat").textContent=recentDayCount(entries);
+  const counts={"Major Arcana":0,Cups:0,Swords:0,Wands:0,Pentacles:0};
+  entries.forEach(e=>counts[e.card.suit]=(counts[e.card.suit]||0)+1);
+  const max=Math.max(1,...Object.values(counts));
+  document.getElementById("suitBars").innerHTML=Object.entries(counts).map(([k,v])=>`
+    <div class="suit-bar-wrap">
+      <div class="suit-bar-label"><span>${k}</span><span>${v}</span></div>
+      <div class="suit-bar-track"><div class="suit-bar-fill" style="width:${(v/max)*100}%"></div></div>
+    </div>`).join("");
+  document.getElementById("patternText").innerHTML=patternAdvice(counts,entries);
+}
+
+function recentDayCount(entries){
+  const set=new Set(entries.map(e=>e.createdAt.slice(0,10)));
+  let count=0; const d=new Date();
+  while(set.has(d.toISOString().slice(0,10))){count++;d.setDate(d.getDate()-1);}
+  return count;
+}
+
+function patternAdvice(counts,entries){
+  if(!entries.length)return "<p style='color:var(--ink-faint);font-style:italic;'>Chưa đủ dữ liệu. Rút bài và ghi chú vài ngày, pattern sẽ bắt đầu hiện ra.</p>";
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  const lines=[];
+  lines.push(`Nhóm xuất hiện nhiều nhất: <b style="color:var(--gold)">${top[0]}</b>.`);
+  if(top[0]==="Swords")lines.push("Giai đoạn này mày đang sống nhiều trong đầu: phân tích, căng thẳng, quyết định. Cần cân bằng bằng hành động hoặc nghỉ ngơi.");
+  if(top[0]==="Cups")lines.push("Trọng tâm đang nghiêng về cảm xúc và quan hệ. Hỏi: mày đang xử lý hay đang bị cuốn?");
+  if(top[0]==="Wands")lines.push("Năng lượng hành động đang rất cao. Coi chừng đốt quá nhanh — cần chiều sâu cân bằng với tốc độ.");
+  if(top[0]==="Pentacles")lines.push("Nền tảng vật chất, tiền bạc và sức khỏe đang đòi chú ý. Hỏi: mày đang xây hay đang vá?");
+  if(top[0]==="Major Arcana")lines.push("Nhiều Major = đang ở giai đoạn chuyển hóa lớn. Không phải chuyện vụn hàng ngày — là bài học cuộc đời đang gõ cửa.");
+  const last=entries.slice(0,3).map(e=>e.card.name).join(", ");
+  lines.push(`Ba lá gần nhất: <b style="color:var(--gold)">${last}</b>. Hỏi: chúng đang kể cùng một câu chuyện gì?`);
+  return lines.map(x=>`<p>${x}</p>`).join("");
+}
+
+function updatePrompt(){
+  const recent=state.entries.slice(0,7).map(e=>({
+    date:e.createdAt.slice(0,10),card:e.card.name,suit:e.card.suit,
+    keywords:e.card.keywords,feeling:e.firstFeeling,mirror:e.selfMirror,action:e.tinyAction
+  }));
+  document.getElementById("aiPrompt").value=`Mày là người đồng hành phản chiếu nội tâm, không bói toán mê tín. Hãy đọc nhật ký tarot sau theo hướng biểu tượng, Jung/archetype, shadow work và hành động thực tế. Chỉ ra pattern lặp lại, câu hỏi sâu hơn, và 1-3 hành động nhỏ cho ngày mai.\n\nDữ liệu:\n${JSON.stringify(recent,null,2)}`;
+}
+
+function exportJson(){
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`tarot-reflection-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click(); URL.revokeObjectURL(a.href); toast("Đã xuất JSON.");
+}
+function importJson(file){
+  const reader=new FileReader();
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      if(!data||!Array.isArray(data.entries))throw new Error("bad");
+      state=data; saveState(); toast("Đã nạp JSON.");
+    }catch{toast("File JSON không đúng định dạng.");}
+  };
+  reader.readAsText(file);
+}
+function wipeData(){
+  if(!confirm("Xóa toàn bộ nhật ký tarot trên máy này?"))return;
+  state={entries:[]}; saveState(); toast("Đã xóa toàn bộ dữ liệu.");
+}
+
+function switchTab(id){
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===id));
+  window.scrollTo({top:0,behavior:"smooth"}); updateAll();
+}
+
+function populateCardPicker(){
+  const picker=document.getElementById("cardPicker");
+  if(!picker||picker.options.length>1)return;
+  ["Major Arcana","Cups","Swords","Wands","Pentacles"].forEach(group=>{
+    const og=document.createElement("optgroup"); og.label=group;
+    deck.filter(c=>c.suit===group).forEach(card=>{
+      const opt=document.createElement("option");
+      opt.value=card.name; opt.textContent=card.name; og.appendChild(opt);
+    }); picker.appendChild(og);
+  });
+}
+
+/* ═══ ENCYCLOPEDIA ═══ */
+function renderEncyclopedia(){
+  const q=(document.getElementById("encycSearch").value||"").toLowerCase().trim();
+  const suit=document.getElementById("encycFilter").value;
+  let cards=deck.filter(c=>!suit||c.suit===suit);
+  if(q)cards=cards.filter(c=>c.name.toLowerCase().includes(q)||c.keywords.join(" ").toLowerCase().includes(q));
+  document.getElementById("encyclopediaList").innerHTML=cards.map(c=>`
+    <details class="card-entry">
+      <summary>
+        <span class="ce-sym">${c.symbol}</span>
+        <span class="ce-name">${c.name}</span>
+        <span class="ce-num">${c.num}</span>
+      </summary>
+      <div class="card-detail">
+        <div class="keywords" style="margin-top:10px;">${c.keywords.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
+        <div class="card-detail-grid">
+          <div class="cd-block">
+            <h5>Ý NGHĨA CƠ BẢN</h5>
+            <p>${c.meaning}</p>
+          </div>
+          <div class="cd-block">
+            <h5>CÂU HỎI PHẢN CHIẾU</h5>
+            <p><em>${c.question}</em></p>
+          </div>
+          <div class="cd-block cd-full">
+            <h5>Ý NGHĨA SÂU</h5>
+            <p>${c.deepMeaning||c.meaning}</p>
+          </div>
+          <div class="cd-block cd-full">
+            <h5>CÂU HỎI ĐỂ ĐÀO SÂU</h5>
+            <p><em>${c.deepQuestion||c.question}</em></p>
+          </div>
+          ${c.shadow?`<div class="cd-block cd-full">
+            <h5>SHADOW / MẶT TỐI</h5>
+            <p>${c.shadow}</p>
+          </div>`:""}
+        </div>
+        <div style="margin-top:8px;">
+          <span class="archetype-badge">✦ ${c.suit}</span>
+          ${c.num?`<span class="shadow-badge">◈ ${c.num}</span>`:""}
+        </div>
+      </div>
+    </details>
+  `).join("");
+}
+
+/* ═══ LEARN TAB SWITCHING ═══ */
+document.querySelectorAll(".learn-tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".learn-tab").forEach(t=>t.classList.remove("active"));
+    document.querySelectorAll(".learn-view").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("learn-"+btn.dataset.learn).classList.add("active");
+    if(btn.dataset.learn==="encyclopedia")renderEncyclopedia();
+  });
+});
+
+document.getElementById("encycSearch").addEventListener("input",renderEncyclopedia);
+document.getElementById("encycFilter").addEventListener("change",renderEncyclopedia);
+
+function updateAll(){
+  populateCardPicker(); renderEntries(); updatePatterns(); updatePrompt();
+}
+
+/* ═══ EVENT LISTENERS ═══ */
+document.querySelectorAll(".tab").forEach(btn=>btn.addEventListener("click",()=>switchTab(btn.dataset.tab)));
+document.getElementById("loadCardBtn").addEventListener("click",loadTypedCard);
+document.getElementById("cardNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")loadTypedCard();});
+document.getElementById("cardPicker").addEventListener("change",e=>{document.getElementById("cardNameInput").value=e.target.value;if(e.target.value)loadTypedCard();});
+document.getElementById("clearDrawBtn").addEventListener("click",clearDraw);
+document.getElementById("saveEntryBtn").addEventListener("click",saveEntry);
+document.getElementById("searchInput").addEventListener("input",renderEntries);
+document.getElementById("filterSuit").addEventListener("change",renderEntries);
+document.getElementById("exportBtn").addEventListener("click",exportJson);
+document.getElementById("importFile").addEventListener("change",e=>e.target.files[0]&&importJson(e.target.files[0]));
+document.getElementById("wipeBtn").addEventListener("click",wipeData);
+document.getElementById("copyPromptBtn").addEventListener("click",async()=>{
+  await navigator.clipboard.writeText(document.getElementById("aiPrompt").value);
+  toast("Đã copy prompt AI.");
+});
+
+updateAll();
+</script>
+</body>
 </html>
